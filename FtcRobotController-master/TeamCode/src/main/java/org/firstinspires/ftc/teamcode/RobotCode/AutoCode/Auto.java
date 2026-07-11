@@ -72,32 +72,31 @@ public class Auto extends LinearOpMode {
             }
 
             //tele
-            telemetry.addData("Selected Routine", ":  " + selectedRoutine + "  <-");
+            telemetry.addData("Selected Routine", ":  " + selectedRoutine);
             telemetry.addData("Step Size (B) ", ":  " + currentIncrement + " Seconds");
-            telemetry.addData("Total Start Delay", "->  " + totalDelaySeconds + " Seconds  <-");
+            telemetry.addData("Total Start Delay", "->  " + totalDelaySeconds + " Seconds");
             telemetry.addLine("\n-------------------------------------");
-            telemetry.addLine("Use D-pad LEFT/RIGHT to change Routine.");
-            telemetry.addLine("Use D-pad UP/DOWN to change Delay.");
+            telemetry.addLine("D-pad LEFT/RIGHT to change Routine.");
+            telemetry.addLine("D-pad UP/DOWN to change Delay.");
             telemetry.addLine("Press (B) to swap step size (1.0, 0.75, 0.5, 0.25).");
             telemetry.update();
 
             sleep(10);
         }
 
-        // --- START PRESSED (Match Begins) ---
+
         waitForStart();
 
         // Recalculate final active delay time
         double finalDelaySeconds = delaySteps * currentIncrement;
 
-        // Step 1: Execute the user-selected match delay
+
         if (finalDelaySeconds > 0) {
             telemetry.addData("Status", "Waiting out delay: " + finalDelaySeconds + "s");
             telemetry.update();
             sleep((long)(finalDelaySeconds * 1000)); // Convert double seconds to long milliseconds
         }
 
-        // Step 2: Run the chosen field trajectory
         switch (selectedRoutine) {
             case BLUE_LEFT:
                 runBlueLeft();
@@ -143,7 +142,6 @@ public class Auto extends LinearOpMode {
         }
     }
 
-    // --- Path Routines ---
     private void runBlueLeft() {
         telemetry.addData("Status", "Executing Blue Left");
         telemetry.update();
