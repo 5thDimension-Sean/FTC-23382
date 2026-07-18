@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.RobotCode;
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.configurables.PanelsConfigurables;
+
 import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.PoseHistory;
+
 public class Tuning {
     public static final double ROBOT_RADIUS = 9; // woah
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
@@ -16,12 +19,14 @@ public class Tuning {
     private static final Style historyLook = new Style(
             "", "#4CAF50", 0.0
     );
+
     /**
      * This prepares Panels Field for using Pedro Offsets
      */
     public static void init() {
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getPEDRO_PATHING());
     }
+
     /**
      * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
      * a Follower as an input, so an instance of the DashboardDrawingHandler class is not needed.
@@ -31,13 +36,14 @@ public class Tuning {
     public static void drawDebug(Follower follower) {
         if (follower.getCurrentPath() != null) {
             drawPath(follower.getCurrentPath(), robotLook);
-            Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            Pose closestPoint = follower.getCurrentPath().getPoint(follower.getCurrentPath().getClosestPointTValue());
             drawRobot(new Pose(closestPoint.getX(), closestPoint.getY(), follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())), robotLook);
         }
         drawPoseHistory(follower.getPoseHistory(), historyLook);
         drawRobot(follower.getPose(), historyLook);
         sendPacket();
     }
+
     /**
      * This draws a robot at a specified Pose with a specified
      * look. The heading is represented as a line.
@@ -60,6 +66,7 @@ public class Tuning {
         panelsField.moveCursor(x1, y1);
         panelsField.line(x2, y2);
     }
+
     /**
      * This draws a robot at a specified Pose. The heading is represented as a line.
      *
@@ -68,6 +75,7 @@ public class Tuning {
     public static void drawRobot(Pose pose) {
         drawRobot(pose, robotLook);
     }
+
     /**
      * This draws a Path with a specified look.
      *
@@ -87,6 +95,7 @@ public class Tuning {
         panelsField.moveCursor(points[0][0], points[0][1]);
         panelsField.line(points[1][0], points[1][1]);
     }
+
     /**
      * This draws all the Paths in a PathChain with a
      * specified look.
@@ -99,6 +108,7 @@ public class Tuning {
             drawPath(pathChain.getPath(i), style);
         }
     }
+
     /**
      * This draws the pose history of the robot.
      *
@@ -113,6 +123,7 @@ public class Tuning {
             panelsField.line(poseTracker.getXPositionsArray()[i + 1], poseTracker.getYPositionsArray()[i + 1]);
         }
     }
+
     /**
      * This draws the pose history of the robot.
      *
@@ -121,6 +132,7 @@ public class Tuning {
     public static void drawPoseHistory(PoseHistory poseTracker) {
         drawPoseHistory(poseTracker, historyLook);
     }
+
     /**
      * This tries to send the current packet to FTControl Panels.
      */
