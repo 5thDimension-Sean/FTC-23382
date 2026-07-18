@@ -25,6 +25,7 @@ allprojects {
         maven { url 'https://maven.aliyun.com/repository/public' }
         google()
         mavenCentral()
+        maven { url = "https://mymaven.bylazar.com/releases" }
     }
 }
 
@@ -33,4 +34,5 @@ repositories {
     maven { url 'https://maven.aliyun.com/repository/public' }
     google()
     mavenCentral()
+    maven { url = "https://mymaven.bylazar.com/releases" }
 }
