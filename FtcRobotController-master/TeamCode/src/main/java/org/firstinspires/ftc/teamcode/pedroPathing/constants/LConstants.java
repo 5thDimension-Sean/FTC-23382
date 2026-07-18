@@ -12,8 +12,8 @@ public class LConstants {
         twoWheelConstants.forwardPodY = 1;
         twoWheelConstants.strafePodX = -2.5;
         twoWheelConstants.IMU_HardwareMapName = "imu";
-        twoWheelConstants.forwardEncoder_HardwareMapName = "frontLeftMotor";
-        twoWheelConstants.strafeEncoder_HardwareMapName = "frontRightMotor";
+        twoWheelConstants.forwardEncoder_HardwareMapName = "fl";
+        twoWheelConstants.strafeEncoder_HardwareMapName = "fr";
         twoWheelConstants.IMU_Orientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
     }
 }

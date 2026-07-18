@@ -11,10 +11,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 public class HardwareDefinitions {
-    public DcMotor fLmotor = null;
-    public DcMotor fRmotor = null;
-    public DcMotor bLmotor = null;
-    public DcMotor bRmotor = null;
+    public DcMotor fl = null;
+    public DcMotor fr = null;
+    public DcMotor bl = null;
+    public DcMotor br = null;
     public IMU imu = null;
     public DistanceSensor frontDistance;
     public DcMotorEx parallel;
@@ -24,23 +24,23 @@ public class HardwareDefinitions {
 
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
         // Motor configuration
-        fLmotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
-        fRmotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
-        bLmotor = hardwareMap.get(DcMotor.class, "backLeftMotor");
-        bRmotor = hardwareMap.get(DcMotor.class, "backRightMotor");
+        fl = hardwareMap.get(DcMotor.class, "fl");
+        fr = hardwareMap.get(DcMotor.class, "fr");
+        bl = hardwareMap.get(DcMotor.class, "bl");
+        br = hardwareMap.get(DcMotor.class, "br");
 
-        fRmotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        bRmotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        br.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        fRmotor.setZeroPowerBehavior(FLOAT);
-        fLmotor.setZeroPowerBehavior(FLOAT);
-        bLmotor.setZeroPowerBehavior(FLOAT);
-        bRmotor.setZeroPowerBehavior(FLOAT);
+        fr.setZeroPowerBehavior(FLOAT);
+        fl.setZeroPowerBehavior(FLOAT);
+        bl.setZeroPowerBehavior(FLOAT);
+        br.setZeroPowerBehavior(FLOAT);
 
-        fLmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fRmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bLmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bRmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetry.addLine("Motors Initialized");
         telemetry.update();
@@ -51,8 +51,8 @@ public class HardwareDefinitions {
         telemetry.update();
 
         // Odometry configuration
-        parallel = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
-        perpendicular = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
+        parallel = hardwareMap.get(DcMotorEx.class, "fl");
+        perpendicular = hardwareMap.get(DcMotorEx.class, "fr");
 
         parallel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         perpendicular.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

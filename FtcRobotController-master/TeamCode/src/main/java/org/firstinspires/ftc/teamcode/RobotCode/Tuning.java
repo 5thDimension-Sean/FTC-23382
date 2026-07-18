@@ -4,6 +4,7 @@ import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.paths.Path;
