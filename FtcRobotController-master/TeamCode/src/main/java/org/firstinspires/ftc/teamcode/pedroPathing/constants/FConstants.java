@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class FConstants {
+
     public static final FollowerConstants followerConstants = new FollowerConstants();
     public static final MecanumConstants mecanumConstants = new MecanumConstants();
     public static final PathConstraints pathConstraints = new PathConstraints(0.995, 0.1, 0.1, 0.007, 500, 0.1, 10, 0.1);
