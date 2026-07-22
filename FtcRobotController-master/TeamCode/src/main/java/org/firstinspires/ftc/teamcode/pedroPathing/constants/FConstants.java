@@ -17,7 +17,7 @@ public class FConstants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(mecanumConstants)
-                .twoWheelLocalizer(LConstants.twoWheelConstants)
+                .driveEncoderLocalizer(LConstants.driveEncoderConstants)
                 .build();
     }
 
@@ -26,10 +26,10 @@ public class FConstants {
         followerConstants.forwardZeroPowerAcceleration = -30.01;
         followerConstants.lateralZeroPowerAcceleration = -85.11;
 
-        mecanumConstants.leftFrontMotorName = "fl";
-        mecanumConstants.leftRearMotorName = "bl";
-        mecanumConstants.rightFrontMotorName = "fr";
-        mecanumConstants.rightRearMotorName = "br";
+        mecanumConstants.leftFrontMotorName = "frontleft";
+        mecanumConstants.leftRearMotorName = "backleft";
+        mecanumConstants.rightFrontMotorName = "frontright";
+        mecanumConstants.rightRearMotorName = "backright";
 
         mecanumConstants.leftFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
         mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.FORWARD;

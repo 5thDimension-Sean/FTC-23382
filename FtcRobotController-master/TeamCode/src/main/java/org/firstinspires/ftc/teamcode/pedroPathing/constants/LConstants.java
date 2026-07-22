@@ -1,19 +1,22 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.constants;
 
-import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.pedropathing.ftc.localization.constants.DriveEncoderConstants;
 
 public class LConstants {
-    public static final TwoWheelConstants twoWheelConstants = new TwoWheelConstants();
+    public static final DriveEncoderConstants driveEncoderConstants = new DriveEncoderConstants();
 
     static {
-        twoWheelConstants.forwardTicksToInches = 0.001989436789;
-        twoWheelConstants.strafeTicksToInches = 0.001989436789;
-        twoWheelConstants.forwardPodY = 1;
-        twoWheelConstants.strafePodX = -2.5;
-        twoWheelConstants.IMU_HardwareMapName = "imu";
-        twoWheelConstants.forwardEncoder_HardwareMapName = "fl";
-        twoWheelConstants.strafeEncoder_HardwareMapName = "fr";
-        twoWheelConstants.IMU_Orientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+        driveEncoderConstants.leftFrontMotorName = "frontleft";
+        driveEncoderConstants.leftRearMotorName = "backleft";
+        driveEncoderConstants.rightFrontMotorName = "frontright";
+        driveEncoderConstants.rightRearMotorName = "backright";
+
+        // You may need to tune these for your robot
+        driveEncoderConstants.forwardTicksToInches = 0.001989436789;
+        driveEncoderConstants.strafeTicksToInches = 0.001989436789;
+        driveEncoderConstants.turnTicksToInches = 0.001989436789;
+
+        driveEncoderConstants.robot_Width = 18;
+        driveEncoderConstants.robot_Length = 18;
     }
 }
