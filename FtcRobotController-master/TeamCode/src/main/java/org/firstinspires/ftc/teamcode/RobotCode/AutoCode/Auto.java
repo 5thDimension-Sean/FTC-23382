@@ -41,7 +41,7 @@ public class Auto extends LinearOpMode {
 
     // Define starting and target poses
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
-    private final Pose endPose = new Pose(24, 0, Math.toRadians(0));
+    private final Pose endPose = new Pose(24, 0, Math.toRadians(180));
 
     private PathChain drivePath;
 

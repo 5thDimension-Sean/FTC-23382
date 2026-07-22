@@ -24,10 +24,10 @@ public class HardwareDefinitions {
 
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
         // Motor configuration
-        fl = hardwareMap.get(DcMotor.class, "fl");
-        fr = hardwareMap.get(DcMotor.class, "fr");
-        bl = hardwareMap.get(DcMotor.class, "bl");
-        br = hardwareMap.get(DcMotor.class, "br");
+        fl = hardwareMap.get(DcMotor.class, "frontleft");
+        fr = hardwareMap.get(DcMotor.class, "frontright");
+        bl = hardwareMap.get(DcMotor.class, "backleft");
+        br = hardwareMap.get(DcMotor.class, "backright");
 
         fr.setDirection(DcMotorSimple.Direction.REVERSE);
         br.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -51,20 +51,20 @@ public class HardwareDefinitions {
         telemetry.update();
 
         // Odometry configuration
-        parallel = hardwareMap.get(DcMotorEx.class, "fl");
-        perpendicular = hardwareMap.get(DcMotorEx.class, "fr");
+        //parallel = hardwareMap.get(DcMotorEx.class, "fl");
+        //perpendicular = hardwareMap.get(DcMotorEx.class, "fr");
 
-        parallel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        perpendicular.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        parallel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        perpendicular.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //parallel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //perpendicular.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //parallel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //perpendicular.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetry.addLine("Odometry Initialized");
         telemetry.update();
 
-        frontDistance = hardwareMap.get(DistanceSensor.class, "frDist");
-        colorSensor = hardwareMap.get(ColorSensor.class, "color_sensor");
-        limitSwitch = hardwareMap.get(TouchSensor.class, "limit_switch");
+        //frontDistance = hardwareMap.get(DistanceSensor.class, "frDist");
+        //colorSensor = hardwareMap.get(ColorSensor.class, "color_sensor");
+        //limitSwitch = hardwareMap.get(TouchSensor.class, "limit_switch");
         telemetry.addLine("Sensors Initialized");
         telemetry.update();
     }
