@@ -3,10 +3,17 @@ package org.firstinspires.ftc.teamcode.RobotCode.AutoCode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.Timer;
+
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
+import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
+import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 
-
-@Autonomous(name="Auto_Selector", group="Robot")
+@Autonomous(name="23382_auto", group="Robot")
 public class Auto extends LinearOpMode {
     HardwareDefinitions robot = new HardwareDefinitions();
     //add routins as needed
@@ -21,16 +28,74 @@ public class Auto extends LinearOpMode {
     private int delaySteps = 0;
     private final double MAX_DELAY_SECONDS = 15.0; // max delay
 
+    private Follower follower;
+    private Timer pathTimer, opModeTimer;
+
+    // Define your state enum
+    public enum PathState {
+        STATE_1,
+        STATE_2,
+        IDLE
+    }
+    private PathState pathState;
+
+    // Define starting and target poses
+    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
+    private final Pose endPose = new Pose(24, 0, Math.toRadians(0));
+
+    private PathChain drivePath;
+
+    public void buildPaths() {
+        drivePath = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, endPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), endPose.getHeading())
+                .build();
+    }
+
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case STATE_1:
+                // Start following the path, true = hold end heading
+                follower.followPath(drivePath, true);
+                setPathState(PathState.STATE_2);
+                break;
+
+            case STATE_2:
+                // Wait until the robot finishes the path
+                if (!follower.isBusy()) {
+                    // Add your next action or transition here
+                    setPathState(PathState.IDLE);
+                }
+                break;
+
+            case IDLE:
+                // Do nothing once finished
+                break;
+        }
+    }
+
+
+    public void setPathState(PathState newPathState) {
+        pathState = newPathState;
+        pathTimer.resetTimer();
+    }
 
 
     @Override
     public void runOpMode() {
+        Tuning.init(); // Initialize FTControl Panels with Pedro offsets
 
         boolean dpadLeftPressed = false;
         boolean dpadRightPressed = false;
         boolean dpadUpPressed = false;
         boolean dpadDownPressed = false;
         boolean bButtonPressed = false;
+
+        // Initialize follower using your auto constants
+        follower = FConstants.createFollower(hardwareMap);
+        follower.setPose(startPose);
+        pathTimer = new Timer();
+        opModeTimer = new Timer();
 
         //loop to allow for routine switching
         while (!isStarted() && !isStopRequested()) {
@@ -87,6 +152,11 @@ public class Auto extends LinearOpMode {
 
         waitForStart();
 
+        // Build paths after start if they depend on selection
+        buildPaths();
+        setPathState(PathState.STATE_1);
+        opModeTimer.resetTimer();
+
         // Recalculate final active delay time
         double finalDelaySeconds = delaySteps * currentIncrement;
 
@@ -97,19 +167,21 @@ public class Auto extends LinearOpMode {
             sleep((long)(finalDelaySeconds * 1000)); // Convert double seconds to long milliseconds
         }
 
-        switch (selectedRoutine) {
-            case BLUE_LEFT:
-                runBlueLeft();
-                break;
-            case BLUE_RIGHT:
-                runBlueRight();
-                break;
-            case RED_LEFT:
-                runRedLeft();
-                break;
-            case RED_RIGHT:
-                runRedRight();
-                break;
+        while (opModeIsActive()) {
+            switch (selectedRoutine) {
+                case BLUE_LEFT:
+                    runBlueLeft();
+                    break;
+                case BLUE_RIGHT:
+                    runBlueRight();
+                    break;
+                case RED_LEFT:
+                    runRedLeft();
+                    break;
+                case RED_RIGHT:
+                    runRedRight();
+                    break;
+            }
         }
     }
 
@@ -142,23 +214,34 @@ public class Auto extends LinearOpMode {
         }
     }
 
-    private void runBlueLeft() {
-        telemetry.addData("Status", "Executing Blue Left");
+    public void updateRobotState(){
+        follower.update();
+
+        // Run state machine logic
+        autonomousPathUpdate();
+
+        // Telemetry data output
+        Tuning.drawDebug(follower); // Draw to FTControl Panels
+        telemetry.addData("Path State", pathState);
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Path Timer", pathTimer.getElapsedTimeSeconds());
         telemetry.update();
+    }
+    private void runBlueLeft() {
+        updateRobotState();
     }
 
     private void runBlueRight() {
-        telemetry.addData("Status", "Executing Blue Right");
-        telemetry.update();
+        updateRobotState();
     }
 
     private void runRedLeft() {
-        telemetry.addData("Status", "Executing Red Left");
-        telemetry.update();
+        updateRobotState();
     }
 
     private void runRedRight() {
-        telemetry.addData("Status", "Executing Red Right");
-        telemetry.update();
+        updateRobotState();
     }
 }
