@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.constants;
 
+import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.DriveEncoderConstants;
 
 public class LConstants {
@@ -15,7 +16,6 @@ public class LConstants {
         driveEncoderConstants.forwardTicksToInches = 0.001989436789;
         driveEncoderConstants.strafeTicksToInches = 0.001989436789;
         driveEncoderConstants.turnTicksToInches = 0.001989436789;
-
         driveEncoderConstants.robot_Width = 18;
         driveEncoderConstants.robot_Length = 18;
     }
