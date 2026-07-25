@@ -26,14 +26,21 @@ public class FConstants {
         followerConstants.forwardZeroPowerAcceleration = -30.01;
         followerConstants.lateralZeroPowerAcceleration = -85.11;
 
+        // Translational PID settings
+        followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.1, 0, 0.01, 0);
+        // Heading PID settings
+        followerConstants.coefficientsHeadingPIDF.setCoefficients(2, 0, 0.1, 0);
+        // Drive PID settings
+        followerConstants.coefficientsDrivePIDF.setCoefficients(0.1, 0, 0, 0.6, 0);
+
         mecanumConstants.leftFrontMotorName = "frontleft";
         mecanumConstants.leftRearMotorName = "backleft";
         mecanumConstants.rightFrontMotorName = "frontright";
         mecanumConstants.rightRearMotorName = "backright";
 
-        mecanumConstants.leftFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
-        mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.FORWARD;
-        mecanumConstants.rightFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
-        mecanumConstants.rightRearMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
+        mecanumConstants.rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
     }
 }
