@@ -12,7 +12,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.PoseHistory;
 
 public class Tuning {
-    public static final double ROBOT_RADIUS = 11; // woah
+    public static final double ROBOT_RADIUS = 9; // Approx 18x18 inch robot
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
     private static final Style robotLook = new Style(
             "", "#3F51B5", 0.0
@@ -58,7 +58,7 @@ public class Tuning {
         }
         panelsField.setStyle(style);
         panelsField.moveCursor(pose.getX(), pose.getY());
-        panelsField.circle(ROBOT_RADIUS);
+        panelsField.rect(ROBOT_RADIUS * 2, ROBOT_RADIUS * 2);
         Vector v = pose.getHeadingAsUnitVector();
         v.setMagnitude(v.getMagnitude() * ROBOT_RADIUS);
         double x1 = pose.getX() + v.getXComponent() / 2, y1 = pose.getY() + v.getYComponent() / 2;

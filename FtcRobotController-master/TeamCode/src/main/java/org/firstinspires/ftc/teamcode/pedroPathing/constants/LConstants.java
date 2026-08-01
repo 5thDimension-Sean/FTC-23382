@@ -20,9 +20,9 @@ public class LConstants {
         driveEncoderConstants.robot_Length = 15.5;
 
         // Encoder directions
-        driveEncoderConstants.leftFrontEncoderDirection = Encoder.REVERSE;
+        driveEncoderConstants.leftFrontEncoderDirection = Encoder.FORWARD;
         driveEncoderConstants.rightFrontEncoderDirection = Encoder.FORWARD;
-        driveEncoderConstants.leftRearEncoderDirection = Encoder.REVERSE;
+        driveEncoderConstants.leftRearEncoderDirection = Encoder.FORWARD;
         driveEncoderConstants.rightRearEncoderDirection = Encoder.FORWARD;
     }
 }

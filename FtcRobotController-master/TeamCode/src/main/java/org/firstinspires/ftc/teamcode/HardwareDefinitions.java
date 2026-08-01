@@ -31,18 +31,18 @@ public class HardwareDefinitions {
         bl = hardwareMap.get(DcMotor.class, "backleft");
         br = hardwareMap.get(DcMotor.class, "backright");
 
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        br.setDirection(DcMotorSimple.Direction.REVERSE);
 
         fr.setZeroPowerBehavior(FLOAT);
         fl.setZeroPowerBehavior(FLOAT);
         bl.setZeroPowerBehavior(FLOAT);
         br.setZeroPowerBehavior(FLOAT);
 
-        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addLine("Motors Initialized");
         telemetry.update();

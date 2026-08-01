@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class FConstants {
     public static final FollowerConstants followerConstants = new FollowerConstants();
     public static final MecanumConstants mecanumConstants = new MecanumConstants();
-    public static final PathConstraints pathConstraints = new PathConstraints(0.995, 0.1, 0.1, 0.007, 500, 0.1, 10, 0.1);
+    public static final PathConstraints pathConstraints = new PathConstraints(0.995, 25, 15, 1.5, 500, 0.4, 10, 0.1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -26,12 +26,11 @@ public class FConstants {
         followerConstants.forwardZeroPowerAcceleration = -30.01;
         followerConstants.lateralZeroPowerAcceleration = -85.11;
 
-        // Translational PID settings
-        followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.08, 0, 0.02, 0);
-        // Heading PID settings
-        followerConstants.coefficientsHeadingPIDF.setCoefficients(1.5, 0, 0.2, 0);
-        // Drive PID settings
-        followerConstants.coefficientsDrivePIDF.setCoefficients(0.05, 0, 0.01, 0.6, 0);
+                followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.02, 0, 0.1, 0);
+// Heading: Aggressive P to ensure it completes the turn
+        followerConstants.coefficientsHeadingPIDF.setCoefficients(6.0, 0, 0.1, 0);
+// Drive: Low P and low F to prevent runaway movement
+        followerConstants.coefficientsDrivePIDF.setCoefficients(0.02, 0, 0.0005, 0.1, 0);
 
         mecanumConstants.leftFrontMotorName = "frontleft";
         mecanumConstants.leftRearMotorName = "backleft";
