@@ -26,11 +26,10 @@ public class FConstants {
         followerConstants.forwardZeroPowerAcceleration = -30.01;
         followerConstants.lateralZeroPowerAcceleration = -85.11;
 
-                followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.02, 0, 0.1, 0);
-// Heading: Aggressive P to ensure it completes the turn
-        followerConstants.coefficientsHeadingPIDF.setCoefficients(1.0, 0, 0.1, 0);
+        followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.1, 0, 0, 0);
+        followerConstants.coefficientsHeadingPIDF.setCoefficients(1.5, 0, 0, 0);
 // Drive: Low P and low F to prevent runaway movement
-        followerConstants.coefficientsDrivePIDF.setCoefficients(0.02, 0, 0.0005, 0.1, 0);
+        followerConstants.coefficientsDrivePIDF.setCoefficients(0.02, 0, 0, 0, 0);
 
         mecanumConstants.leftFrontMotorName = "frontleft";
         mecanumConstants.leftRearMotorName = "backleft";
@@ -41,5 +40,6 @@ public class FConstants {
         mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
         mecanumConstants.rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
         mecanumConstants.rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
+
     }
 }
