@@ -23,6 +23,7 @@ public class Auto extends LinearOpMode {
         RED_LEFT,
         RED_RIGHT
     }
+    
     private routine selectedRoutine = routine.BLUE_LEFT;
     private double currentIncrement = 1.0;
     private int delaySteps = 0;
