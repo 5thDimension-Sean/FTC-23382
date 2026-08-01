@@ -12,7 +12,7 @@ import com.pedropathing.util.Timer;
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
 import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
 import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
-
+ 
 @Autonomous(name="23382_auto", group="Robot")
 public class Auto extends LinearOpMode {
     HardwareDefinitions robot = new HardwareDefinitions();
