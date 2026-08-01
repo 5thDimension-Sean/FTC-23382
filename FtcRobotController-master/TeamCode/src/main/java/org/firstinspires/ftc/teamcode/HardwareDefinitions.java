@@ -56,6 +56,7 @@ public class HardwareDefinitions {
                         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                 )
         );
+        imu.initialize(parameters);
         telemetry.addLine("IMU Initialized");
         telemetry.update();
 
