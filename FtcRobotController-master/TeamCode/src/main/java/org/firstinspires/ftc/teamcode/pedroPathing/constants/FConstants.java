@@ -37,9 +37,9 @@ public class FConstants {
         mecanumConstants.rightFrontMotorName = "frontright";
         mecanumConstants.rightRearMotorName = "backright";
 
-        mecanumConstants.leftFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
-        mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.FORWARD;
-        mecanumConstants.rightFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
-        mecanumConstants.rightRearMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
+        mecanumConstants.rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
+        mecanumConstants.rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
     }
 }
