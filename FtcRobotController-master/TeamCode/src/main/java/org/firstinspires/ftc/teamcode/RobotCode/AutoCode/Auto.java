@@ -8,6 +8,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.robocol.Command;
 
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
@@ -83,6 +84,7 @@ public class Auto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        robot.init(hardwareMap, telemetry);
         Tuning.init(); // Initialize FTControl Panels with Pedro offsets
 
         boolean dpadLeftPressed = false;
@@ -96,6 +98,16 @@ public class Auto extends LinearOpMode {
         follower.setPose(startPose);
         pathTimer = new Timer();
         opModeTimer = new Timer();
+
+        // Reset Encoders
+        robot.fl.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.fr.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bl.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.br.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.fl.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.fr.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.bl.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.br.setMode(com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //loop to allow for routine switching
         while (!isStarted() && !isStopRequested()) {

@@ -24,5 +24,7 @@ public class LConstants {
         driveEncoderConstants.rightFrontEncoderDirection = Encoder.FORWARD;
         driveEncoderConstants.leftRearEncoderDirection = Encoder.FORWARD;
         driveEncoderConstants.rightRearEncoderDirection = Encoder.FORWARD;
+
+        driveEncoderConstants.forwardTicksToInches(5.94);
     }
 }
