@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.RobotCode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 
@@ -38,6 +40,7 @@ public class Tele extends LinearOpMode {
             telemetry.addData("FR Ticks (Raw | Adj)", "%d | %.1f", robot.fr.getCurrentPosition(), robot.fr.getCurrentPosition() * LConstants.driveEncoderConstants.rightFrontEncoderDirection);
             telemetry.addData("BL Ticks (Raw | Adj)", "%d | %.1f", robot.bl.getCurrentPosition(), robot.bl.getCurrentPosition() * LConstants.driveEncoderConstants.leftRearEncoderDirection);
             telemetry.addData("BR Ticks (Raw | Adj)", "%d | %.1f", robot.br.getCurrentPosition(), robot.br.getCurrentPosition() * LConstants.driveEncoderConstants.rightRearEncoderDirection);
+            telemetry.addData("IMU heading", robot.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             telemetry.addLine("\nMove robot FORWARD. Adjusted values should all be POSITIVE.");
             telemetry.update();
         }

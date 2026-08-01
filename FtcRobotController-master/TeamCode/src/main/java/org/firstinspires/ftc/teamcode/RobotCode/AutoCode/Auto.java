@@ -8,6 +8,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.robocol.Command;
 
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
 import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
@@ -69,7 +70,6 @@ public class Auto extends LinearOpMode {
                 break;
 
             case IDLE:
-                // Do nothing once finished
                 break;
         }
     }
@@ -231,6 +231,7 @@ public class Auto extends LinearOpMode {
     }
     private void runBlueLeft() {
         updateRobotState();
+
     }
 
     private void runBlueRight() {
