@@ -48,6 +48,7 @@ public class HardwareDefinitions {
         telemetry.update();
 
         // IMU configuration
+
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -55,6 +56,7 @@ public class HardwareDefinitions {
                         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                 )
         );
+        imu.
         telemetry.addLine("IMU Initialized");
         telemetry.update();
 
