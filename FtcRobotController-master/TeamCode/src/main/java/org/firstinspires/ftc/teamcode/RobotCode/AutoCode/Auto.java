@@ -8,12 +8,10 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.robocol.Command;
 
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
 import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
-import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
+import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
 
 @Autonomous(name="23382_auto", group="Robot")
 public class Auto extends LinearOpMode {

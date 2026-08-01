@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.RobotCode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
-import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+import org.firstinspires.ftc.teamcode.RobotCode.constants.LConstants;
 
 @TeleOp(name="23382 Tele-op")
 public class Tele extends LinearOpMode {
