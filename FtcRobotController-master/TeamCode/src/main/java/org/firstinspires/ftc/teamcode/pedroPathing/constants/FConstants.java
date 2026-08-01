@@ -28,7 +28,7 @@ public class FConstants {
 
                 followerConstants.coefficientsTranslationalPIDF.setCoefficients(0.02, 0, 0.1, 0);
 // Heading: Aggressive P to ensure it completes the turn
-        followerConstants.coefficientsHeadingPIDF.setCoefficients(6.0, 0, 0.1, 0);
+        followerConstants.coefficientsHeadingPIDF.setCoefficients(1.0, 0, 0.1, 0);
 // Drive: Low P and low F to prevent runaway movement
         followerConstants.coefficientsDrivePIDF.setCoefficients(0.02, 0, 0.0005, 0.1, 0);
 
