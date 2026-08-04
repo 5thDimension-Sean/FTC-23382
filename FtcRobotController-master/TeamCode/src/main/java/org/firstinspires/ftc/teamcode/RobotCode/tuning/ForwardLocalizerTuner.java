@@ -35,7 +35,7 @@ public class ForwardLocalizerTuner extends OpMode {
         follower.update();
         double measured = follower.getPose().getX();
         double multiplier = (measured == 0) ? 0
-                : LConstants.driveEncoderConstants.forwardTicksToInches * DISTANCE / measured;
+                : LConstants.forwardTicksToInches * DISTANCE / measured;
 
         telemetry.addData("distance moved (in)", measured);
         telemetry.addData("forwardTicksToInches should be", multiplier);

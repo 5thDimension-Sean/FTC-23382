@@ -47,7 +47,7 @@ public class TurnLocalizerTuner extends OpMode {
 
         double target = TURNS * 2 * Math.PI;
         double multiplier = (totalHeading == 0) ? 0
-                : LConstants.driveEncoderConstants.turnTicksToInches * target / totalHeading;
+                : LConstants.turnTicksToInches * target / totalHeading;
 
         telemetry.addData("total heading (rad)", totalHeading);
         telemetry.addData("turnTicksToInches should be", multiplier);

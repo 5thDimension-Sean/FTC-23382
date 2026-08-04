@@ -35,7 +35,7 @@ public class LateralLocalizerTuner extends OpMode {
         follower.update();
         double measured = follower.getPose().getY();
         double multiplier = (measured == 0) ? 0
-                : LConstants.driveEncoderConstants.strafeTicksToInches * DISTANCE / measured;
+                : LConstants.strafeTicksToInches * DISTANCE / measured;
 
         telemetry.addData("distance moved (in)", measured);
         telemetry.addData("strafeTicksToInches should be", multiplier);
