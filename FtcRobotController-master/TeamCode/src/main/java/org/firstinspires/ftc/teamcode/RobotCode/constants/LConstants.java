@@ -14,8 +14,8 @@ public class LConstants {
 
         // You may need to tune these for your robot
         driveEncoderConstants.forwardTicksToInches = 0.0110412;
-        driveEncoderConstants.strafeTicksToInches = 0.0110412;
-        driveEncoderConstants.turnTicksToInches = 0.0110412;
+        driveEncoderConstants.strafeTicksToInches = 0.01656;
+        driveEncoderConstants.turnTicksToInches = 0.01243;
         driveEncoderConstants.robot_Width = 15.5;
         driveEncoderConstants.robot_Length = 15.5;
 

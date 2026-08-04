@@ -12,19 +12,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Pre-match checklist OpMode.
- *
- * Walks every motor, sensor, and the battery one at a time, animating a spinner
- * while each item is verified. At the end it either prints "Go 5th Dimension"
- * (all good) or "Error: <error type>" if anything failed to come online or the
- * battery is too low to trust.
- *
- * Voltage rules:
- *   > 13.0 V: healthy, no message
- *   <= 12.5 V: reminder (charge soon, still allowed to run)
- *   <  12.0 V: error (do not run)
- */
+
 @TeleOp(name = "check", group = "5th Dimension")
 public class SysCheck extends LinearOpMode {
 

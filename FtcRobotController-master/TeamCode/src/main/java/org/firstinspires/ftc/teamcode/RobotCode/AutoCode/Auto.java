@@ -56,15 +56,15 @@ public class Auto extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case STATE_1:
-                // Start following the path, true = hold end heading
+       
                 follower.followPath(drivePath, true);
                 setPathState(PathState.STATE_2);
                 break;
 
             case STATE_2:
-                // Wait until the robot finishes the path
+     
                 if (!follower.isBusy()) {
-                    // Add your next action or transition here
+              
                     setPathState(PathState.IDLE);
                 }
                 break;
