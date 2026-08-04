@@ -68,7 +68,5 @@ public class CurvedBackAndForth extends OpMode {
         }
 
         Tuning.drawDebug(follower);
-        telemetry.addData("going forward", forward);
-        follower.telemetryDebug(telemetry);
     }
 }
