@@ -4,14 +4,13 @@ import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.PoseHistory;
 
-public class Tuning {
+public class ftcdash {
     public static final double ROBOT_RADIUS = 9; // Approx 18x18 inch robot
     private static final FieldManager panelsField = PanelsField.INSTANCE.getField();
     private static final Style robotLook = new Style(

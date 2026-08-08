@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RobotCode.tuning;
+package org.firstinspires.ftc.teamcode.RobotCode.pidfTune;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -11,7 +11,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
-import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
+import org.firstinspires.ftc.teamcode.RobotCode.ftcdash;
 import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
 
 /**
@@ -30,7 +30,7 @@ public class StraightBackAndForth extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Tuning.init();
+        ftcdash.init();
 
         follower = FConstants.createFollower(hardwareMap);
 
@@ -67,7 +67,7 @@ public class StraightBackAndForth extends OpMode {
             }
         }
 
-        Tuning.drawDebug(follower);
+        ftcdash.drawDebug(follower);
         telemetry.addData("going forward", forward);
     }
 }

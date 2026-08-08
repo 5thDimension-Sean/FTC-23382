@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RobotCode.tuning;
+package org.firstinspires.ftc.teamcode.RobotCode.pidfTune;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import com.pedropathing.follower.Follower;
 
-import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
+import org.firstinspires.ftc.teamcode.RobotCode.ftcdash;
 import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
 
 @TeleOp(name = "Localization Test", group = "Pedro Tuning")
@@ -21,7 +21,7 @@ public class LocalizationTest extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        Tuning.init();
+        ftcdash.init();
 
         follower = FConstants.createFollower(hardwareMap);
 
@@ -53,7 +53,7 @@ public class LocalizationTest extends OpMode {
         fr.setPower((y - x - rx) / d);
         br.setPower((y + x - rx) / d);
 
-        Tuning.drawDebug(follower);
+        ftcdash.drawDebug(follower);
 
         telemetry.addData("x",       follower.getPose().getX());
         telemetry.addData("y",       follower.getPose().getY());

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RobotCode.tuning;
+package org.firstinspires.ftc.teamcode.RobotCode.pidfTune;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -12,12 +12,12 @@ import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
 import org.firstinspires.ftc.teamcode.RobotCode.constants.LConstants;
 
 /**
- * Push the robot straight forward DISTANCE inches using a ruler.
- * Read the displayed multiplier and put it into LConstants.forwardTicksToInches.
+ * Push the robot sideways (left/right) DISTANCE inches using a ruler.
+ * Read the displayed multiplier and put it into LConstants.strafeTicksToInches.
  */
 @Config
-@Autonomous(name = "Forward Localizer Tuner", group = "Pedro Tuning")
-public class ForwardLocalizerTuner extends OpMode {
+@Autonomous(name = "Lateral Localizer Tuner", group = "Pedro Tuning")
+public class LateralLocalizerTuner extends OpMode {
     public static double DISTANCE = 48;
 
     private Follower follower;
@@ -26,19 +26,19 @@ public class ForwardLocalizerTuner extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         follower = FConstants.createFollower(hardwareMap);
-        telemetry.addLine("Push the robot " + DISTANCE + " inches forward, then read the multiplier.");
+        telemetry.addLine("Push the robot " + DISTANCE + " inches sideways, then read the multiplier.");
         telemetry.update();
     }
 
     @Override
     public void loop() {
         follower.update();
-        double measured = follower.getPose().getX();
+        double measured = follower.getPose().getY();
         double multiplier = (measured == 0) ? 0
-                : LConstants.forwardTicksToInches * DISTANCE / measured;
+                : LConstants.strafeTicksToInches * DISTANCE / measured;
 
         telemetry.addData("distance moved (in)", measured);
-        telemetry.addData("forwardTicksToInches should be", multiplier);
+        telemetry.addData("strafeTicksToInches should be", multiplier);
         telemetry.update();
     }
 }

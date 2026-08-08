@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RobotCode.tuning;
+package org.firstinspires.ftc.teamcode.RobotCode.pidfTune;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Runs the robot forward until VELOCITY (in/s) is reached, then cuts power.
+ * Runs the robot sideways (right) until VELOCITY (in/s) is reached, then cuts power.
  * Measures average deceleration and displays it.
- * Put the result into FConstants.followerConstants.forwardZeroPowerAcceleration (it will be negative).
+ * Put the result into FConstants.followerConstants.lateralZeroPowerAcceleration (will be negative).
  * Press A/cross to stop early.
  */
 @Config
-@Autonomous(name = "Forward Zero Power Accel Tuner", group = "Pedro Tuning")
-public class ForwardZeroPowerAccelTuner extends OpMode {
+@Autonomous(name = "Lateral Zero Power Accel Tuner", group = "Pedro Tuning")
+public class LateralZeroPowerAccelTuner extends OpMode {
     public static double VELOCITY = 30;
 
     private Follower follower;
@@ -36,8 +36,8 @@ public class ForwardZeroPowerAccelTuner extends OpMode {
 
     private double prevVelocity;
     private long prevTimeNano;
-    private double prevX;
-    private long prevXTimeNano;
+    private double prevY;
+    private long prevYTimeNano;
 
     private boolean stopping;
     private boolean done;
@@ -62,17 +62,21 @@ public class ForwardZeroPowerAccelTuner extends OpMode {
             m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         }
 
-        prevX = 0;
-        prevXTimeNano = System.nanoTime();
+        prevY = 0;
+        prevYTimeNano = System.nanoTime();
 
-        telemetry.addLine("Robot will drive forward until reaching " + VELOCITY + " in/s, then cut power.");
+        telemetry.addLine("Robot will strafe right until reaching " + VELOCITY + " in/s, then cut power.");
         telemetry.addLine("Make sure you have room. Press A to stop.");
         telemetry.update();
     }
 
     @Override
     public void start() {
-        for (DcMotorEx m : motors) m.setPower(1);
+        // Strafe right: fl=+1, fr=-1, bl=-1, br=+1 (with reversed left motors already applied)
+        fl.setPower(-1);
+        fr.setPower(-1);
+        bl.setPower(1);
+        br.setPower(1);
     }
 
     @Override
@@ -84,12 +88,12 @@ public class ForwardZeroPowerAccelTuner extends OpMode {
         }
 
         follower.update();
-        double x = follower.getPose().getX();
+        double y = follower.getPose().getY();
         long now = System.nanoTime();
-        double dt = (now - prevXTimeNano) / 1e9;
-        double velocity = (dt > 0) ? (x - prevX) / dt : 0;
-        prevX = x;
-        prevXTimeNano = now;
+        double dt = (now - prevYTimeNano) / 1e9;
+        double velocity = (dt > 0) ? Math.abs((y - prevY) / dt) : 0;
+        prevY = y;
+        prevYTimeNano = now;
 
         if (!done) {
             if (!stopping) {
@@ -112,7 +116,7 @@ public class ForwardZeroPowerAccelTuner extends OpMode {
             double avg = 0;
             for (double a : accelerations) avg += a;
             avg /= accelerations.size();
-            telemetry.addData("forwardZeroPowerAcceleration", avg);
+            telemetry.addData("lateralZeroPowerAcceleration", avg);
             telemetry.update();
         }
     }

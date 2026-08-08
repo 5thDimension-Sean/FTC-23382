@@ -10,7 +10,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 
 import org.firstinspires.ftc.teamcode.HardwareDefinitions;
-import org.firstinspires.ftc.teamcode.RobotCode.Tuning;
+import org.firstinspires.ftc.teamcode.RobotCode.ftcdash;
 import org.firstinspires.ftc.teamcode.RobotCode.constants.FConstants;
  
 @Autonomous(name="23382_auto", group="Robot")
@@ -84,7 +84,7 @@ public class Auto extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
-        Tuning.init(); // Initialize FTControl Panels with Pedro offsets
+        ftcdash.init(); // Initialize FTControl Panels with Pedro offsets
 
         boolean dpadLeftPressed = false;
         boolean dpadRightPressed = false;
@@ -232,7 +232,7 @@ public class Auto extends LinearOpMode {
         autonomousPathUpdate();
 
         // Telemetry data output
-        Tuning.drawDebug(follower); // Draw to FTControl Panels
+        ftcdash.drawDebug(follower); // Draw to FTControl Panels
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
