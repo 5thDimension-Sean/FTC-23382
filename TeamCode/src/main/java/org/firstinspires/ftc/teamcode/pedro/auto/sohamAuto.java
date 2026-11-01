@@ -19,14 +19,16 @@ public class sohamAuto extends OpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(56, 8, 90);
-    private final Pose path1 = poseFactory.of(56, 18, 90);
-    private final Pose point2Start = poseFactory.of(56, 18, 90);
-    private final Pose point2 = poseFactory.of(22.3931, 46.5549, 180);
-    private final Pose point3Start = poseFactory.of(22.3931, 46.5549, 180);
-    private final Pose point3 = poseFactory.of(58.0192, 116.299, 270);
-    private final Pose point3Control1 = poseFactory.of(20.6077, 101.076, 0);
-    private final Pose point3Control2 = poseFactory.of(31.8137, 116.967, 0);
-
+    private final Pose path1 = poseFactory.of(55.8514, 14.2433, 90);
+    private final Pose point2Start = poseFactory.of(55.8514, 14.2433, 90);
+    private final Pose point2 = poseFactory.of(8.8206, 14.0719, 270);
+    private final Pose point3Start = poseFactory.of(8.8206, 14.0719, 270);
+    private final Pose point3 = poseFactory.of(44.9208, 125.7566, 90);
+    private final Pose point4 = poseFactory.of(54.1112, 10, 129.8046);
+    private final Pose point4Control1 = poseFactory.of(14.5018, 57.5329, 0);
+    private final Pose point5Start = poseFactory.of(54.1112, 10, 90);
+    private final Pose point5 = poseFactory.of(55.5241, 12.9606, 90);
+    private final Pose point6 = poseFactory.of(7.714, 102.0362, 125);
 
     public Path path1() {
         return Paths.line(start, path1).linear(start, path1);
@@ -37,13 +39,29 @@ public class sohamAuto extends OpMode {
     }
 
     public Path path3() {
-        return Paths.curve(point3Start, point3Control1, point3Control2, point3).linear(point3Start, point3);
+        return Paths.line(point3Start, point3).linear(point3Start, point3);
     }
+
+    public Path path4() {
+        return Paths.curve(point3, point4Control1, point4).reverseTangent();
+    }
+
+    public Path path5() {
+        return Paths.line(point5Start, point5).linear(point5Start, point5);
+    }
+
+    public Path path6() {
+        return Paths.line(point5, point6).constant(point6);
+    }
+
     private Command autoRoutine() {
         return sequential(
                 follow(follower, path1()),
                 follow(follower, path2()),
-                follow(follower, path3())
+                follow(follower, path3()),
+                follow(follower, path4()),
+                follow(follower, path5()),
+                follow(follower, path6())
         );
     }
 
