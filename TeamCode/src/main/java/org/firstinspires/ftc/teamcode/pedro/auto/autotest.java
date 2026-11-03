@@ -13,7 +13,7 @@ import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
-@Autonomous(name = "autoTest", group = "Auto")
+@Autonomous(name = "autoTestDONOTUSE", group = "Auto")
 public class autotest extends OpMode {
     private Follower follower;
     private final PoseFactory poseFactory = PoseFactory.degrees();

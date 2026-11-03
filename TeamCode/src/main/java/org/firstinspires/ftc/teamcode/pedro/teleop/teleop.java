@@ -10,10 +10,11 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 public class teleop extends OpMode {
 
     private Follower follower;
-
+    intake i = new intake();
     @Override
     public void init() {
         follower = Constants.create(hardwareMap);
+        i.init(hardwareMap);
     }
 
     @Override
