@@ -4,7 +4,10 @@ import com.pedropathing.ivy.Command;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.pedropathing.follower.Follower;
+import org.firstinspires.ftc.teamcode.pedro.Alliance;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.pedro.FieldDrawer;
+import org.firstinspires.ftc.teamcode.pedro.RobotPose;
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Pose;
 import static com.pedropathing.api.Paths.*;
@@ -82,8 +85,8 @@ public class soloRed extends OpMode {
     public void init() {
         Scheduler.reset();
         follower = Constants.create(hardwareMap);
-        follower.setPose(start);
-        follower.update();
+        // The auto's first pose is also the shared start pose that teleop continues from.
+        RobotPose.startAuto(follower, start, Alliance.RED);
     }
     @Override
     public void start() {
@@ -92,11 +95,20 @@ public class soloRed extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        RobotPose.update(follower);
         Scheduler.execute();
+
+        FieldDrawer.drawRobot(follower.pose());
+        FieldDrawer.update();
 
         telemetry.addData("X", follower.pose().x());
         telemetry.addData("Y", follower.pose().y());
         telemetry.addData("Heading", Math.toDegrees(follower.pose().heading()));
         telemetry.update();
+    }
+    @Override
+    public void stop() {
+        // Last pose of the auto, so teleop starts from where the robot really ended up.
+        RobotPose.update(follower);
     }
 }
