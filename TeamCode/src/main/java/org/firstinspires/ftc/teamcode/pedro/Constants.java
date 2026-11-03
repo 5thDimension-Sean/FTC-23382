@@ -42,6 +42,14 @@ public class Constants {
     public static final Pose teleopFallbackStart = new Pose(58.75, 9.5, Math.toRadians(180));
 
     // ------------------------------------------------------------------------------------------
+    // Auto manipulator defaults (the values every auto starts with before the driver changes them
+    // in init). Max speed moves in 5% steps, the wait in 0.5 s steps.
+    // ------------------------------------------------------------------------------------------
+    public static final int autoDefaultMaxSpeedPercent = 100;
+    public static final double autoDefaultWaitSeconds = 0;
+    public static final boolean autoDefaultPark = true;
+
+    // ------------------------------------------------------------------------------------------
     // Limelight 3A AprilTag relocalization
     // Camera mounting offset must be entered in the Limelight web UI (robot-space camera pose), so
     // the botpose it returns is already for the robot centre.

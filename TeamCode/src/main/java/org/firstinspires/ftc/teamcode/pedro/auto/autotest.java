@@ -58,8 +58,12 @@ public class autotest extends OpMode {
         RobotPose.startAuto(follower, start, Alliance.RED);
     }
     @Override
+    public void init_loop() {
+        autoManipulator.initLoop(gamepad1, telemetry, start);
+    }
+    @Override
     public void start() {
-        schedule(autoRoutine());
+        schedule(autoManipulator.start(follower, autoRoutine()));
     }
     @Override
     public void loop() {
@@ -77,7 +81,7 @@ public class autotest extends OpMode {
     }
     @Override
     public void stop() {
-        // Last pose of the auto, so teleop starts from where the robot really ended up.
-        RobotPose.update(follower);
+        // Hands the speed limit back and saves the last pose so teleop starts where we ended up.
+        autoManipulator.stop(follower);
     }
 }

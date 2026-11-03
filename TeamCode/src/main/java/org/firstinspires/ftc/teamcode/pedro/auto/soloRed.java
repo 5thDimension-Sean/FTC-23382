@@ -77,9 +77,12 @@ public class soloRed extends OpMode {
                 follow(follower, shootLoad()),
                 follow(follower, goToLoader()),
                 follow(follower, collectBalls()),
-                follow(follower, goToStartShoot()),
-                follow(follower, park())
+                follow(follower, goToStartShoot())
         );
+    }
+    // Kept separate so the "Park at end" setting can skip it.
+    private Command parkRoutine() {
+        return follow(follower, park());
     }
     @Override
     public void init() {
@@ -89,8 +92,12 @@ public class soloRed extends OpMode {
         RobotPose.startAuto(follower, start, Alliance.RED);
     }
     @Override
+    public void init_loop() {
+        autoManipulator.initLoop(gamepad1, telemetry, start);
+    }
+    @Override
     public void start() {
-        schedule(autoRoutine());
+        schedule(autoManipulator.start(follower, autoRoutine(), parkRoutine()));
     }
     @Override
     public void loop() {
@@ -108,7 +115,7 @@ public class soloRed extends OpMode {
     }
     @Override
     public void stop() {
-        // Last pose of the auto, so teleop starts from where the robot really ended up.
-        RobotPose.update(follower);
+        // Hands the speed limit back and saves the last pose so teleop starts where we ended up.
+        autoManipulator.stop(follower);
     }
 }
