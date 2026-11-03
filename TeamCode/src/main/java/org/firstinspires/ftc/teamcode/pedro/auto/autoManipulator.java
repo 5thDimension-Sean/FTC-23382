@@ -6,12 +6,15 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.commands.Commands;
 import com.pedropathing.ivy.groups.Groups;
 import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.FieldDrawer;
 import org.firstinspires.ftc.teamcode.pedro.RobotPose;
+
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +25,15 @@ import java.util.List;
  * The settings are static, so they are shared by every auto and survive between runs (until the
  * Robot Controller app restarts). Adding the three calls below to an auto is all it takes:
  *
- *   init_loop():  autoManipulator.initLoop(gamepad1, telemetry, start);
- *   start():      schedule(autoManipulator.start(follower, autoRoutine(), parkRoutine()));
+ *   init_loop():  autoManipulator.initLoop(gamepad1, telemetry, start, routinePaths(), parkPaths());
+ *   start():      schedule(autoManipulator.start(follower,
+ *                         autoManipulator.followAll(follower, routinePaths()),
+ *                         autoManipulator.followAll(follower, parkPaths())));
  *   stop():       autoManipulator.stop(follower);
+ *
+ * Giving initLoop the same paths the auto drives lets it show an estimated finish time, the same
+ * idea as the Pedro visualizer: path lengths, the robot's tuned top speed / braking, the wait and
+ * the park setting, compared with the 30 s auto.
  *
  * Controls (gamepad1, during init):
  *   dpad up / down     pick a setting
@@ -118,6 +127,17 @@ public final class autoManipulator {
      * draws the robot at the auto's start pose on the Panels field so you can check the setup.
      */
     public static void initLoop(Gamepad gamepad, Telemetry telemetry, Pose startPose) {
+        initLoop(gamepad, telemetry, startPose, null, null);
+    }
+
+    /**
+     * Same as above, plus the estimated time to finish the auto.
+     *
+     * @param routinePaths the paths the auto always drives, in order
+     * @param parkPaths    the paths only driven when "Park at end" is ON (may be null)
+     */
+    public static void initLoop(Gamepad gamepad, Telemetry telemetry, Pose startPose,
+                                Path[] routinePaths, Path[] parkPaths) {
         boolean up = gamepad.dpad_up, down = gamepad.dpad_down;
         boolean left = gamepad.dpad_left, right = gamepad.dpad_right;
         boolean leftBumper = gamepad.left_bumper, rightBumper = gamepad.right_bumper;
@@ -139,12 +159,59 @@ public final class autoManipulator {
         for (int i = 0; i < OPTIONS.length; i++) {
             telemetry.addData((i == selected ? "> " : "   ") + OPTIONS[i].name, OPTIONS[i].display());
         }
+        if (routinePaths != null) {
+            double drive = estimateDriveSeconds(routinePaths);
+            double parkTime = park() && parkPaths != null ? estimateDriveSeconds(parkPaths) : 0;
+            double total = waitSeconds() + drive + parkTime;
+            telemetry.addData("Estimated time", "%.1f s   (wait %.1f + drive %.1f + park %.1f)",
+                    total, waitSeconds(), drive, parkTime);
+            double spare = Constants.autoLengthSeconds - total;
+            telemetry.addData("Auto budget", spare >= 0
+                    ? String.format("%.1f s to spare of %.0f s", spare, Constants.autoLengthSeconds)
+                    : String.format("OVER by %.1f s - will NOT finish! Lower the wait or turn park off", -spare));
+        }
         telemetry.addData("Alliance", RobotPose.alliance());
         telemetry.addData("Start pose", "x %.1f  y %.1f  h %.1f deg",
                 startPose.x(), startPose.y(), Math.toDegrees(startPose.heading()));
 
         FieldDrawer.drawRobot(startPose);
         FieldDrawer.update();
+    }
+
+    /** One follow command per path, run in order. */
+    public static Command followAll(Follower follower, Path... paths) {
+        Command[] steps = new Command[paths.length];
+        for (int i = 0; i < paths.length; i++) steps[i] = follow(follower, paths[i]);
+        return Groups.sequential(steps);
+    }
+
+    /**
+     * Estimated time to drive the paths at the current max-speed setting, in seconds. Each path is
+     * modelled as speeding up, cruising at the speed limit, then braking, starting from rest. The
+     * real robot flows from one path into the next without fully stopping, so this errs slightly
+     * long; heading turns and the time spent on other mechanisms are not included.
+     */
+    public static double estimateDriveSeconds(Path... paths) {
+        double topSpeed = Constants.foresightConfig.maxAchievableForwardVelocity.get();
+        double speed = topSpeed * maxSpeedFraction();
+        double decel = Constants.foresightConfig.naturalForwardDeceleration.get();
+        double total = 0;
+        for (Path path : paths) {
+            total += legSeconds(path.curve.length(), speed, Constants.autoEstimateAcceleration, decel);
+        }
+        return total;
+    }
+
+    /** Time to cover {@code length} from rest to rest with a speed cap (trapezoid or triangle profile). */
+    static double legSeconds(double length, double maxSpeed, double accel, double decel) {
+        if (length <= 0) return 0;
+        double rampUp = maxSpeed * maxSpeed / (2 * accel);
+        double rampDown = maxSpeed * maxSpeed / (2 * decel);
+        if (length >= rampUp + rampDown) {
+            return maxSpeed / accel + maxSpeed / decel + (length - rampUp - rampDown) / maxSpeed;
+        }
+        double peak = Math.sqrt(2 * length * accel * decel / (accel + decel)); // never reaches the cap
+        return peak / accel + peak / decel;
     }
 
     /**

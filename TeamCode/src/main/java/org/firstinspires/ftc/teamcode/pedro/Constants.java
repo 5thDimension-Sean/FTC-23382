@@ -48,6 +48,13 @@ public class Constants {
     public static final int autoDefaultMaxSpeedPercent = 100;
     public static final double autoDefaultWaitSeconds = 0;
     public static final boolean autoDefaultPark = true;
+    /** Length of the autonomous period, used to warn when the estimate says an auto will not finish. */
+    public static final double autoLengthSeconds = 30;
+    /**
+     * Speed-up used by the auto time estimate (in/s^2). The estimate is only as good as this
+     * number: time a real run with a stopwatch and adjust it until the two agree.
+     */
+    public static final double autoEstimateAcceleration = 60;
 
     // ------------------------------------------------------------------------------------------
     // Limelight 3A AprilTag relocalization

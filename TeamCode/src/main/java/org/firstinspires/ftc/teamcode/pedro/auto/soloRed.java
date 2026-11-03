@@ -21,6 +21,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 @Autonomous(name = "soloRed", group = "Auto")
 public class soloRed extends OpMode {
     private Follower follower;
+    private Path[] estimateRoutine, estimatePark; // built once in init for the time estimate
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(58.75, 9.5, 180);
@@ -70,34 +71,32 @@ public class soloRed extends OpMode {
     public Path park() {
         return Paths.curve(parkStart, parkControl1, park).linear(parkStart, park);
     }
-    private Command autoRoutine() {
-        return sequential(
-                follow(follower, garden()),
-                follow(follower, moveToOtherSide()),
-                follow(follower, shootLoad()),
-                follow(follower, goToLoader()),
-                follow(follower, collectBalls()),
-                follow(follower, goToStartShoot())
-        );
+    // The auto's paths, in order. The manipulator both drives them and uses them for the time estimate.
+    private Path[] routinePaths() {
+        return new Path[]{garden(), moveToOtherSide(), shootLoad(), goToLoader(), collectBalls(), goToStartShoot()};
     }
     // Kept separate so the "Park at end" setting can skip it.
-    private Command parkRoutine() {
-        return follow(follower, park());
+    private Path[] parkPaths() {
+        return new Path[]{park()};
     }
     @Override
     public void init() {
         Scheduler.reset();
+        estimateRoutine = routinePaths();
+        estimatePark = parkPaths();
         follower = Constants.create(hardwareMap);
         // The auto's first pose is also the shared start pose that teleop continues from.
         RobotPose.startAuto(follower, start, Alliance.RED);
     }
     @Override
     public void init_loop() {
-        autoManipulator.initLoop(gamepad1, telemetry, start);
+        autoManipulator.initLoop(gamepad1, telemetry, start, estimateRoutine, estimatePark);
     }
     @Override
     public void start() {
-        schedule(autoManipulator.start(follower, autoRoutine(), parkRoutine()));
+        schedule(autoManipulator.start(follower,
+                autoManipulator.followAll(follower, routinePaths()),
+                autoManipulator.followAll(follower, parkPaths())));
     }
     @Override
     public void loop() {
