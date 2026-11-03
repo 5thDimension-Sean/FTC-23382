@@ -11,10 +11,12 @@ public class teleop extends OpMode {
 
     private Follower follower;
     intake i = new intake();
+    turret t = new turret();
     @Override
     public void init() {
         follower = Constants.create(hardwareMap);
         i.init(hardwareMap);
+        t.init(hardwareMap);
     }
 
     @Override

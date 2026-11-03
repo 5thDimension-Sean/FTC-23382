@@ -17,6 +17,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
+    public static final double pollenWeight = 24.95; //weight in g
+    public static final double pollenDiameter = 2.8; //length in cm
+    public static final double nectarWeight = 41.28; //weight in g
+    public static final double nectarDiameter = 3.6; //length in cm
+
+
     public static Follower create(HardwareMap h) {
         return new Follower(
                 new PinpointLocalizer(h, localizerConfig),

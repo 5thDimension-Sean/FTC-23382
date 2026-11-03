@@ -9,4 +9,10 @@ public class intake {
     public void init(HardwareMap hardwareMap){
         intake = hardwareMap.get(DcMotor.class, "intake");
     }
+
+    public void intakePower(double power){
+        intake.setPower(power);
+    }
+
+
 }
