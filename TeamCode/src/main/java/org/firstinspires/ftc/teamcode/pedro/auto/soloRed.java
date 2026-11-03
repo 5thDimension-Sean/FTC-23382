@@ -24,56 +24,67 @@ public class soloRed extends OpMode {
     private Path[] estimateRoutine, estimatePark; // built once in init for the time estimate
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(58.75, 9.5, 180);
-    private final Pose garden = poseFactory.of(9.5, 10, 180);
+    private final Pose start = poseFactory.of(58.75, 9.5, 270);
+    private final Pose garden = poseFactory.of(7, 10, 270);
     private final Pose gardenControl1 = poseFactory.of(27, 30, 0);
-    private final Pose moveToOtherSideStart = poseFactory.of(9.5, 10, 180);
-    private final Pose moveToOtherSide = poseFactory.of(47, 115, 0);
-    private final Pose moveToOtherSideControl1 = poseFactory.of(35, 41, 0);
-    private final Pose moveToOtherSideControl2 = poseFactory.of(8, 108, 0);
-    private final Pose shootloadStart = poseFactory.of(47, 115, 0);
-    private final Pose shootload = poseFactory.of(47, 126, 0);
-    private final Pose goToLoaderStart = poseFactory.of(47, 126, 0);
-    private final Pose goToLoader = poseFactory.of(27, 47, 90);
-    private final Pose goToLoaderControl1 = poseFactory.of(26, 97, 0);
-    private final Pose collectBallsStart = poseFactory.of(27, 47, 90);
-    private final Pose collectBalls = poseFactory.of(14, 47, 90);
-    private final Pose goToStartShootStart = poseFactory.of(14, 47, 90);
-    private final Pose goToStartShoot = poseFactory.of(58.75, 9.5, 180);
-    private final Pose parkStart = poseFactory.of(58.75, 9.5, 180);
-    private final Pose park = poseFactory.of(16, 95, 90);
-    private final Pose parkControl1 = poseFactory.of(22, 30, 0);
+    private final Pose collectMoveStart = poseFactory.of(7, 10, 270);
+    private final Pose collectMove = poseFactory.of(25, 10, 270);
+    private final Pose travelSideShootStart = poseFactory.of(25, 10, 270);
+    private final Pose travelSideShoot = poseFactory.of(47, 120, 90);
+    private final Pose travelSideShootControl1 = poseFactory.of(22.3488, 36.5621, 0);
+    private final Pose travelSideShootControl2 = poseFactory.of(23.9949, 118.8663, 0);
+    private final Pose goToFlower = poseFactory.of(47, 123, 90);
+    private final Pose backup = poseFactory.of(47, 115, 90);
+    private final Pose goToFlower2 = poseFactory.of(24, 47, 92.0431);
+    private final Pose goToFlower2Control1 = poseFactory.of(22.2855, 95.0614, 0);
+    private final Pose pickup2 = poseFactory.of(19, 47, 180);
+    private final Pose backup2 = poseFactory.of(27.5, 47, 180);
+    private final Pose backupShoot = poseFactory.of(58.75, 15, 134.3206);
+    private final Pose park = poseFactory.of(11.5226, 91.6426, 87.2125);
+    private final Pose parkControl1 = poseFactory.of(9.0535, 40.9305, 0);
 
     public Path garden() {
         return Paths.curve(start, gardenControl1, garden).linear(start, garden);
     }
 
-    public Path moveToOtherSide() {
-        return Paths.curve(moveToOtherSideStart, moveToOtherSideControl1, moveToOtherSideControl2, moveToOtherSide).linear(moveToOtherSideStart, moveToOtherSide);
+    public Path collectMove() {
+        return Paths.line(collectMoveStart, collectMove).linear(collectMoveStart, collectMove);
     }
 
-    public Path shootLoad() {
-        return Paths.line(shootloadStart, shootload).linear(shootloadStart, shootload);
+    public Path travelSideShoot() {
+        return Paths.curve(travelSideShootStart, travelSideShootControl1, travelSideShootControl2, travelSideShoot).linear(travelSideShootStart, travelSideShoot);
     }
 
-    public Path goToLoader() {
-        return Paths.curve(goToLoaderStart, goToLoaderControl1, goToLoader).linear(goToLoaderStart, goToLoader);
+    public Path goToFlower() {
+        return Paths.line(travelSideShoot, goToFlower).tangent();
     }
 
-    public Path collectBalls() {
-        return Paths.line(collectBallsStart, collectBalls).linear(collectBallsStart, collectBalls);
+    public Path backup() {
+        return Paths.line(goToFlower, backup).reverseTangent();
     }
 
-    public Path goToStartShoot() {
-        return Paths.line(goToStartShootStart, goToStartShoot).linear(goToStartShootStart, goToStartShoot);
+    public Path goToFlower2() {
+        return Paths.curve(backup, goToFlower2Control1, goToFlower2).reverseTangent();
+    }
+
+    public Path pickup2() {
+        return Paths.line(goToFlower2, pickup2).tangent();
+    }
+
+    public Path backup2() {
+        return Paths.line(pickup2, backup2).reverseTangent();
+    }
+
+    public Path backupShoot() {
+        return Paths.line(backup2, backupShoot).reverseTangent();
     }
 
     public Path park() {
-        return Paths.curve(parkStart, parkControl1, park).linear(parkStart, park);
+        return Paths.curve(backupShoot, parkControl1, park).tangent();
     }
     // The auto's paths, in order. The manipulator both drives them and uses them for the time estimate.
     private Path[] routinePaths() {
-        return new Path[]{garden(), moveToOtherSide(), shootLoad(), goToLoader(), collectBalls(), goToStartShoot()};
+        return new Path[]{garden(), collectMove(), travelSideShoot(), goToFlower(), backup(), goToFlower2(), pickup2(), backup2(), backupShoot()};
     }
     // Kept separate so the "Park at end" setting can skip it.
     private Path[] parkPaths() {
