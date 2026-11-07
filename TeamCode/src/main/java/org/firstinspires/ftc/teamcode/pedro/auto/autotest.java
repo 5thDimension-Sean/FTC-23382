@@ -4,7 +4,10 @@ import com.pedropathing.ivy.Command;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.pedropathing.follower.Follower;
+import org.firstinspires.ftc.teamcode.pedro.Alliance;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.pedro.FieldDrawer;
+import org.firstinspires.ftc.teamcode.pedro.RobotPose;
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Pose;
 import static com.pedropathing.api.Paths.*;
@@ -16,6 +19,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 @Autonomous(name = "autoTestDONOTUSE", group = "Auto")
 public class autotest extends OpMode {
     private Follower follower;
+    private Path[] estimateRoutine; // built once in init for the time estimate
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(56, 8, 90);
@@ -39,33 +43,43 @@ public class autotest extends OpMode {
     public Path path3() {
         return Paths.line(point3Start, point3).linear(point3Start, point3);
     }
-    private Command autoRoutine() {
-        return sequential(
-                follow(follower, path1()),
-                follow(follower, path2()),
-                follow(follower, path3())
-        );
+    private Path[] routinePaths() {
+        return new Path[]{path1(), path2(), path3()};
     }
 
     @Override
     public void init() {
         Scheduler.reset();
+        estimateRoutine = routinePaths();
         follower = Constants.create(hardwareMap);
-        follower.setPose(start);
-        follower.update();
+        // The auto's first pose is also the shared start pose that teleop continues from.
+        RobotPose.startAuto(follower, start, Alliance.RED);
+    }
+    @Override
+    public void init_loop() {
+        autoManipulator.initLoop(gamepad1, telemetry, start, estimateRoutine, null);
     }
     @Override
     public void start() {
-        schedule(autoRoutine());
+        schedule(autoManipulator.start(follower, autoManipulator.followAll(follower, routinePaths())));
     }
     @Override
     public void loop() {
         follower.update();
+        RobotPose.update(follower);
         Scheduler.execute();
+
+        FieldDrawer.drawRobot(follower.pose());
+        FieldDrawer.update();
 
         telemetry.addData("X", follower.pose().x());
         telemetry.addData("Y", follower.pose().y());
         telemetry.addData("Heading", Math.toDegrees(follower.pose().heading()));
         telemetry.update();
+    }
+    @Override
+    public void stop() {
+        // Hands the speed limit back and saves the last pose so teleop starts where we ended up.
+        autoManipulator.stop(follower);
     }
 }
