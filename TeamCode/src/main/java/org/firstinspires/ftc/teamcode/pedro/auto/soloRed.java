@@ -15,11 +15,10 @@ import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
-@Autonomous(name = "soloRed", group = "Auto")
+@Autonomous(name = "Solo_R", group = "Auto")
 public class soloRed extends OpMode {
     private Follower follower;
     private final PoseFactory poseFactory = PoseFactory.degrees();
-
     private final Pose start = poseFactory.of(58.75, 9.5, 270);
     private final Pose garden = poseFactory.of(7, 10, 270);
     private final Pose gardenControl1 = poseFactory.of(27, 30, 0);
@@ -31,17 +30,15 @@ public class soloRed extends OpMode {
     private final Pose travelSideShootControl2 = poseFactory.of(23.9949, 118.8663, 0);
     private final Pose goToFlower = poseFactory.of(47, 123, 90);
     private final Pose backup = poseFactory.of(47, 115, 90);
-    private final Pose goToGoalScore = poseFactory.of(58.975, 17, 155.7806);
-    private final Pose goToGoalScoreControl1 = poseFactory.of(18.6134, 100.7594, 0);
-    private final Pose goToGoalScoreControl2 = poseFactory.of(23.9315, 32.7634, 0);
-    private final Pose travelToFlowerStart = poseFactory.of(58.975, 17, 180);
-    private final Pose travelToFlower = poseFactory.of(27, 47, 180);
-    private final Pose travelToFlowerControl1 = poseFactory.of(42.2284, 18.9616, 0);
-    private final Pose goToFlower_2 = poseFactory.of(18, 47, 180);
-    private final Pose backUp = poseFactory.of(27, 47, 180);
-    private final Pose travelShoot = poseFactory.of(58.75, 17, 136.6233);
-    private final Pose park = poseFactory.of(11.6492, 93, 89.8852);
-    private final Pose parkControl1 = poseFactory.of(11.5859, 59.1008, 0);
+    private final Pose goToGoalScoreStart = poseFactory.of(47, 115, 90);
+    private final Pose goToGoalScore = poseFactory.of(23.672, 47, 180);
+    private final Pose goToGoalScoreControl1 = poseFactory.of(26.7172, 113.6748, 0);
+    private final Pose goToFlower2 = poseFactory.of(16, 47, 180);
+    private final Pose backup2 = poseFactory.of(23, 47, 180);
+    private final Pose goalStart = poseFactory.of(23, 47, 180);
+    private final Pose goal = poseFactory.of(58.75, 15, 180);
+    private final Pose park = poseFactory.of(11.206, 91.4527, 91.6218);
+    private final Pose parkControl1 = poseFactory.of(12.7888, 35.5491, 0);
 
     public Path garden() {
         return Paths.curve(start, gardenControl1, garden).linear(start, garden);
@@ -64,27 +61,23 @@ public class soloRed extends OpMode {
     }
 
     public Path goToGoalScore() {
-        return Paths.curve(backup, goToGoalScoreControl1, goToGoalScoreControl2, goToGoalScore).reverseTangent();
+        return Paths.curve(goToGoalScoreStart, goToGoalScoreControl1, goToGoalScore).linear(goToGoalScoreStart, goToGoalScore);
     }
 
-    public Path travelToFlower() {
-        return Paths.curve(travelToFlowerStart, travelToFlowerControl1, travelToFlower).linear(travelToFlowerStart, travelToFlower);
+    public Path goToFlower2() {
+        return Paths.line(goToGoalScore, goToFlower2).tangent();
     }
 
-    public Path goToFlower_2() {
-        return Paths.line(travelToFlower, goToFlower_2).tangent();
+    public Path backup2() {
+        return Paths.line(goToFlower2, backup2).reverseTangent();
     }
 
-    public Path backUp() {
-        return Paths.line(goToFlower_2, backUp).reverseTangent();
-    }
-
-    public Path travelShoot() {
-        return Paths.line(backUp, travelShoot).reverseTangent();
+    public Path goal() {
+        return Paths.line(goalStart, goal).linear(goalStart, goal);
     }
 
     public Path park() {
-        return Paths.curve(travelShoot, parkControl1, park).tangent();
+        return Paths.curve(goal, parkControl1, park).tangent();
     }
     private Command autoRoutine() {
         return sequential(
@@ -94,10 +87,9 @@ public class soloRed extends OpMode {
                 follow(follower, goToFlower()),
                 follow(follower, backup()),
                 follow(follower, goToGoalScore()),
-                follow(follower, travelToFlower()),
-                follow(follower, goToFlower_2()),
-                follow(follower, backUp()),
-                follow(follower, travelShoot()),
+                follow(follower, goToFlower2()),
+                follow(follower, backup2()),
+                follow(follower, goal()),
                 follow(follower, park())
         );
     }

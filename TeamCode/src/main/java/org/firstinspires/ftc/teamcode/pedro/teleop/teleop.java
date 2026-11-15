@@ -10,21 +10,21 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 public class teleop extends OpMode {
 
     private Follower follower;
-    intake i = new intake();
-    turret t = new turret();
+    //intake i = new intake();
+    //turret t = new turret();
     @Override
     public void init() {
         follower = Constants.create(hardwareMap);
-        i.init(hardwareMap);
-        t.init(hardwareMap);
+        //i.init(hardwareMap);
+        //t.init(hardwareMap);
     }
 
     @Override
     public void loop() {
         follower.manual(
                 -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                gamepad1.right_stick_x
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x
         );
 
         follower.update();
