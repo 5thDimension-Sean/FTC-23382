@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 public class teleop extends OpMode {
 
     private Follower follower;
-    //intake i = new intake();
+    intake i = new intake();
     //turret t = new turret();
     @Override
     public void init() {
