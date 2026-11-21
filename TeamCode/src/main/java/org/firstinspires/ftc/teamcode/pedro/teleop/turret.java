@@ -9,11 +9,12 @@ public class turret {
     private final int robotY = 217; //in mm
 
     public void init(HardwareMap hardwareMap){
-        turret = hardwareMap.get(DcMotor.class, "turrets");
+        turret = hardwareMap.get(DcMotor.class, "turret");
     }
     //get current position for odom and camera and maybe distance idk but montecarlo it
     //assuming currentPos = currentx, currenty.
-    private int currentX = 2123;
-    private int currentY = 12049;
+    public void setPower(double power){
+        turret.setPower(power);
+    }
 
 }
