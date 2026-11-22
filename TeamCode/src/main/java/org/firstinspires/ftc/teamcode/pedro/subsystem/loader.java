@@ -22,7 +22,7 @@ public class loader {
      *
      * @param position "open" (1.0) or "close" (0.0), case-insensitive.
      */
-    public void moveLoader(String position){
+    public void position(String position){
         if(position.equalsIgnoreCase("open")){
             loaderLeft.setPosition(1.0);
             loaderLeft.setPosition(1.0);
@@ -36,7 +36,7 @@ public class loader {
      *
      * @param direction 0 to decrease position(close), 1 to increase position(open).
      */
-    public void moveLoaderManual(int direction){
+    public void positionManual(int direction){
         if(direction == 0){
             loaderLeft.setPosition(loaderLeft.getPosition()-0.01);
             loaderRight.setPosition(loaderRight.getPosition()-0.01);

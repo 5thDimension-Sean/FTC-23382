@@ -7,13 +7,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 public class turret {
-    private DcMotor turret;
+    //private DcMotor turret;
     private ServoImplEx linkage;
     private final int robotX = 166; // in mm
     private final int robotY = 217; //in mm
 
     public void init(HardwareMap hardwareMap){
-        turret = hardwareMap.get(DcMotor.class, "turret");
+        //turret = hardwareMap.get(DcMotor.class, "turret");
         linkage = hardwareMap.get(ServoImplEx.class, "linkage");
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
     }
@@ -24,9 +24,9 @@ public class turret {
      *
      * @param power Motor power from -1.0 to 1.0; 0 stops the turret.
      */
-    public void setPower(double power){
-        turret.setPower(power);
-    }
+    //public void setPower(double power){
+        //turret.setPower(power);
+    //}
 
     /**
      * Moves the linkage servo to a predefined position.

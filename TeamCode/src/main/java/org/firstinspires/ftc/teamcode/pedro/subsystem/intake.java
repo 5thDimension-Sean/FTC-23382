@@ -12,7 +12,8 @@ public class intake {
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
     }
 
-    public void intakePower(double power){
+
+    public void setPower(double power){
         intakeLeft.setPower(power);
         intakeRight.setPower(power);
     }
