@@ -27,5 +27,15 @@ public class loader {
         }
     }
 
+    public void moveLoaderManual(int direction){
+        if(direction == 0){
+            loaderLeft.setPosition(loaderLeft.getPosition()-0.01);
+            loaderRight.setPosition(loaderRight.getPosition()-0.01);
+        }else if(direction == 1){
+            loaderLeft.setPosition(loaderLeft.getPosition()+0.01);
+            loaderRight.setPosition(loaderRight.getPosition()+0.01);
+        }
+    }
+
 
 }
