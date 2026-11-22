@@ -17,6 +17,11 @@ public class loader {
         loaderRight.setPwmRange(new PwmControl.PwmRange(500, 2500));
     }
 
+    /**
+     * Moves both loader servos to a predefined position.
+     *
+     * @param position "open" (1.0) or "close" (0.0), case-insensitive.
+     */
     public void moveLoader(String position){
         if(position.equalsIgnoreCase("open")){
             loaderLeft.setPosition(1.0);
@@ -26,7 +31,11 @@ public class loader {
             loaderLeft.setPosition(0.0);
         }
     }
-
+    /**
+     * Incrementally adjusts both loader servos by 0.01 per call.
+     *
+     * @param direction 0 to decrease position(close), 1 to increase position(open).
+     */
     public void moveLoaderManual(int direction){
         if(direction == 0){
             loaderLeft.setPosition(loaderLeft.getPosition()-0.01);
