@@ -17,12 +17,13 @@ public class loader {
         loaderRight.setPwmRange(new PwmControl.PwmRange(500, 2500));
     }
 
-    public void servo(String position){
+    public void moveLoader(String position){
         if(position.equalsIgnoreCase("open")){
-            loaderLeft.setPosition(0.4);
-            loaderLeft.setPosition
+            loaderLeft.setPosition(1.0);
+            loaderLeft.setPosition(1.0);
         } else if(position.equalsIgnoreCase("close")){
-
+            loaderLeft.setPosition(0.0);
+            loaderLeft.setPosition(0.0);
         }
     }
 
