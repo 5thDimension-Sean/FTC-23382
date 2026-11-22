@@ -10,7 +10,7 @@ public class intake {
     private long lastUpdateTime = System.nanoTime();
 
     // Maximum power change per second
-    private static final double RAMP_RATE = 1.5;
+    private static final double RAMP_RATE = 6.5;
 
     public void init(HardwareMap hardwareMap){
         intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
