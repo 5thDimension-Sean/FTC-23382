@@ -23,6 +23,9 @@ public class Constants {
     public static final double nectarDiameter = 3.6; //length in cm
 
     public static final String TURRET_FLYWHEEL_MOTOR_NAME = "turret";
+    public static final int TURRET_FLYWHEEL_TICKS_PER_REVOLUTION = 28; // goBILDA 5203-2402-0001
+    public static final double TURRET_FLYWHEEL_MAX_TEST_RPM = 5000.0;
+
     public static final double TURRET_FLYWHEEL_KP = 1.0;
     public static final double TURRET_FLYWHEEL_KI = 0.0;
     public static final double TURRET_FLYWHEEL_KD = 0.0;

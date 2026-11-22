@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
-@TeleOp(name = "Zero 5-Turn Servo", group = "Calibration")
+@TeleOp(name = "half 5-Turn Servo", group = "Calibration")
 public class servoZero extends LinearOpMode {
 
     private ServoImplEx loaderLeft;

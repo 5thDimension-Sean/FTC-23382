@@ -10,7 +10,8 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Turret Flywheel PIDF Tuner", group = "Calibration")
 public class TurretFlywheelTuner extends OpMode {
-    private static final double MAX_TEST_TICKS_PER_SECOND = 500.0;
+    private static final double MAX_TEST_TICKS_PER_SECOND =
+            Constants.TURRET_FLYWHEEL_MAX_TEST_RPM * Constants.TURRET_FLYWHEEL_TICKS_PER_REVOLUTION / 60.0;
 
     private final String[] gainNames = {"P", "I", "D", "F"};
     private final double[] gains = {

@@ -11,8 +11,6 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 public class turret {
     private DcMotorEx flywheel;
     private ServoImplEx linkage;
-    private final int robotX = 166; // in mm
-    private final int robotY = 217; //in mm
 
     public void init(HardwareMap hardwareMap){
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
