@@ -12,7 +12,7 @@ public class servoZero extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        fiveTurnServo = hardwareMap.get(ServoImplEx.class, "turretServo");
+        fiveTurnServo = hardwareMap.get(ServoImplEx.class, "linkage");
         fiveTurnServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
         telemetry.addLine("Press PLAY to move servo to exact 0.5 center (2.5 turns).");
         telemetry.update();
