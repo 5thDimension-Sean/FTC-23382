@@ -54,9 +54,9 @@ public class teleop extends OpMode {
             turret.moveLink("close");
         }
         if(gamepad1.left_trigger_pressed){
-            turret.moveBlockerManual(1);
+            turret.moveBlocker("open");
         } else if(gamepad1.left_bumper){
-            turret.moveBlockerManual(0);
+            turret.moveBlocker("close");
         }
 
         if(gamepad2.b){
