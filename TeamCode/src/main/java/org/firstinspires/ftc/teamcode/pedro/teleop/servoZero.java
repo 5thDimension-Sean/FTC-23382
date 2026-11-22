@@ -21,7 +21,7 @@ public class servoZero extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        loaderLeft.setPosition(0.0);
+        loaderLeft.setPosition(1.0);
         loaderRight.setPosition(0.0);
 
         while (opModeIsActive()) {

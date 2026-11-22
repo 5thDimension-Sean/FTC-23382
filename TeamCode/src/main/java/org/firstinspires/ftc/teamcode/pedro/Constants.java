@@ -26,10 +26,10 @@ public class Constants {
     public static final int TURRET_FLYWHEEL_TICKS_PER_REVOLUTION = 28; // goBILDA 5203-2402-0001
     public static final double TURRET_FLYWHEEL_MAX_TEST_RPM = 5000.0;
 
-    public static final double TURRET_FLYWHEEL_KP = 11.0;
+    public static final double TURRET_FLYWHEEL_KP = 12.5;
     public static final double TURRET_FLYWHEEL_KI = 1;
-    public static final double TURRET_FLYWHEEL_KD = 1.5;
-    public static final double TURRET_FLYWHEEL_KF = 11.0;
+    public static final double TURRET_FLYWHEEL_KD = 0.0;
+    public static final double TURRET_FLYWHEEL_KF = 14.5;
 
 
     public static Follower create(HardwareMap h) {

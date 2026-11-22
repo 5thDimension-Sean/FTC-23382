@@ -15,7 +15,7 @@ public class teleop extends OpMode {
     private Follower follower;
     intake intake = new intake();
     turret turret = new turret();
-    //loader loader = new loader();
+    loader loader = new loader();
     private int pressed = 0;
 
     @Override
@@ -23,7 +23,7 @@ public class teleop extends OpMode {
         follower = Constants.create(hardwareMap);
         intake.init(hardwareMap);
         turret.init(hardwareMap);
-        //loader.init(hardwareMap);
+        loader.init(hardwareMap);
     }
 
     @Override
@@ -35,13 +35,13 @@ public class teleop extends OpMode {
         );
 
         if(gamepad1.right_trigger != 0){
-            intake.setPower(Math.max(gamepad1.right_trigger+0.5, 1));
+            intake.setPowerGradual(Math.max(gamepad1.right_trigger+0.5, 1));
         } else if(gamepad1.right_bumper){
-            intake.setPower(-1);
+            intake.setPowerGradual(-1);
         } else{
-            intake.setPower(0);
+            intake.setPowerGradual(0);
         }
-        /*
+
         if (gamepad1.a && pressed % 2 == 0){
             loader.position("open");
             pressed+=1;
@@ -56,7 +56,7 @@ public class teleop extends OpMode {
             loader.positionManual(1);
         }
         follower.update();
-        */
+
 
     }
 }

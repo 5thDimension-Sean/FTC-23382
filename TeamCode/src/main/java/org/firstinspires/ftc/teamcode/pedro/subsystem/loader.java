@@ -25,10 +25,10 @@ public class loader {
     public void position(String position){
         if(position.equalsIgnoreCase("open")){
             loaderLeft.setPosition(1.0);
-            loaderLeft.setPosition(1.0);
+            loaderRight.setPosition(0.0);
         } else if(position.equalsIgnoreCase("close")){
             loaderLeft.setPosition(0.0);
-            loaderLeft.setPosition(0.0);
+            loaderRight.setPosition(1.0);
         }
     }
     /**
@@ -39,10 +39,10 @@ public class loader {
     public void positionManual(int direction){
         if(direction == 0){
             loaderLeft.setPosition(loaderLeft.getPosition()-0.01);
-            loaderRight.setPosition(loaderRight.getPosition()-0.01);
+            loaderRight.setPosition(loaderRight.getPosition()+0.01);
         }else if(direction == 1){
             loaderLeft.setPosition(loaderLeft.getPosition()+0.01);
-            loaderRight.setPosition(loaderRight.getPosition()+0.01);
+            loaderRight.setPosition(loaderRight.getPosition()-0.01);
         }
     }
 
