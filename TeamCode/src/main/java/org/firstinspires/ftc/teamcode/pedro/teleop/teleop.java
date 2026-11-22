@@ -29,13 +29,6 @@ public class teleop extends OpMode {
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x
         );
-        if (gamepad1.left_bumper) {
-            t.setPower(0.75);
-        } else if (gamepad1.right_bumper) {
-            t.setPower(0.5);
-        } else {
-            t.setPower(0.0);
-        }
 
         follower.update();
     }
