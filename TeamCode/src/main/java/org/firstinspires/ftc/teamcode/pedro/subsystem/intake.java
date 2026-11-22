@@ -4,17 +4,17 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class intake {
-    private DcMotor intakeleft;
-    private DcMotor intakeright;
+    private DcMotor intakeLeft;
+    private DcMotor intakeRight;
 
     public void init(HardwareMap hardwareMap){
-        intakeleft = hardwareMap.get(DcMotor.class, "intakeleft");
-        intakeright = hardwareMap.get(DcMotor.class, "intakeright");
+        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
+        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
     }
 
     public void intakePower(double power){
-        intakeleft.setPower(power);
-        intakeright.setPower(power);
+        intakeLeft.setPower(power);
+        intakeRight.setPower(power);
     }
 
 
