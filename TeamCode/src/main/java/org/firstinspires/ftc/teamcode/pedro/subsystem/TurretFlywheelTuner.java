@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.pedro.teleop;
+package org.firstinspires.ftc.teamcode.pedro.subsystem;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.firstinspires.ftc.teamcode.pedro.teleop.teleop;
 
 @TeleOp(name = "Turret Flywheel PIDF Tuner", group = "Calibration")
 public class TurretFlywheelTuner extends OpMode {
@@ -28,7 +30,7 @@ public class TurretFlywheelTuner extends OpMode {
 
     @Override
     public void init() {
-        flywheel = hardwareMap.get(DcMotorEx.class, turret.FLYWHEEL_MOTOR_NAME);
+        flywheel = hardwareMap.get(DcMotorEx.class, "turret");
         previousMode = flywheel.getMode();
         previousGains = flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setPower(0);
