@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 public class loader {
-    private ServoImplEx loaderLeft;
-    private ServoImplEx loaderRight;
+    public ServoImplEx loaderLeft;
+    public ServoImplEx loaderRight;
 
     public void init(HardwareMap hardwareMap){
         loaderLeft = hardwareMap.get(ServoImplEx.class, "loaderLeft");

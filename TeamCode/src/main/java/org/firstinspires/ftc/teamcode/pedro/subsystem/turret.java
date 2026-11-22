@@ -10,13 +10,18 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 public class turret {
     private DcMotorEx flywheel;
-    private ServoImplEx linkage;
+    public ServoImplEx linkage;
+    public ServoImplEx turretServo;
+    public ServoImplEx blocker;
 
     public void init(HardwareMap hardwareMap){
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         linkage = hardwareMap.get(ServoImplEx.class, "linkage");
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
-
+        turretServo = hardwareMap.get(ServoImplEx.class, "turretServo");
+        turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        blocker = hardwareMap.get(ServoImplEx.class, "blocker");
+        blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
         flywheel.setPower(0);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setVelocityPIDFCoefficients(
@@ -39,13 +44,25 @@ public class turret {
     /**
      * Moves the linkage servo to a predefined position.
      *
-     * @param position "open" (1.0) or "close" (0.0), case-insensitive.
+     * @param position "open" (0.61.0) or "close" (0.0), case-insensitive.
      */
-    public void moveLoader(String position){
+    public void moveLink(String position){
         if(position.equalsIgnoreCase("open")){
-            linkage.setPosition(1.0);
+            linkage.setPosition(0.61);
         } else if(position.equalsIgnoreCase("close")){
             linkage.setPosition(0.0);
+        }
+    }
+    /**
+     * Moves the blocker servo to a predefined position.
+     *
+     * @param position "open" (0.47) or "close" (0.17), case-insensitive.
+     */
+    public void moveBlocker(String position){
+        if(position.equalsIgnoreCase("open")){
+            blocker.setPosition(0.17);
+        } else if(position.equalsIgnoreCase("close")){
+            linkage.setPosition(0.47);
         }
     }
     /**
@@ -53,12 +70,35 @@ public class turret {
      *
      * @param direction 0 to decrease position, 1 to increase position.
      */
-    public void moveLoaderManual(int direction){
+    public void moveLinkManual(int direction){
         if(direction == 0){
-            linkage.setPosition(linkage.getPosition()-0.01);
+            linkage.setPosition(linkage.getPosition()-0.005);
         }else if(direction == 1){
-            linkage.setPosition(linkage.getPosition()+0.01);
+            linkage.setPosition(linkage.getPosition()+0.005);
         }
     }
-
+    /**
+     * Incrementally adjusts the turret servo position by 0.01 per call.
+     *
+     * @param direction 0 to go left, 1 to go right.
+     */
+    public void moveTurretManual(int direction){
+        if(direction == 0){
+            turretServo.setPosition(turretServo.getPosition()-0.005);
+        }else if(direction == 1){
+            turretServo.setPosition(turretServo.getPosition()+0.005);
+        }
+    }
+    /**
+     * Incrementally adjusts the blocker servo position by 0.01 per call.
+     *
+     * @param direction 0 to go left, 1 to go right.
+     */
+    public void moveBlockerManual(int direction){
+        if(direction == 0){
+            blocker.setPosition(blocker.getPosition()-0.005);
+        }else if(direction == 1){
+            blocker.setPosition(blocker.getPosition()+0.005);
+        }
+    }
 }

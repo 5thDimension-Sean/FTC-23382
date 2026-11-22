@@ -35,13 +35,52 @@ public class teleop extends OpMode {
         );
 
         if(gamepad1.right_trigger != 0){
-            intake.setPowerGradual(Math.max(gamepad1.right_trigger+0.5, 1));
+            intake.setPowerGradual(Math.min(gamepad1.right_trigger+0.5, 1));
+            turret.setFlywheelVelocity(2500);
         } else if(gamepad1.right_bumper){
             intake.setPowerGradual(-1);
         } else{
             intake.setPowerGradual(0);
+            turret.setFlywheelVelocity(0);
+        }
+        if(gamepad1.b){
+            turret.moveTurretManual(1);
+        } else if(gamepad1.x){
+            turret.moveTurretManual(0);
+        }
+        if(gamepad1.y){
+            turret.moveLink("open");
+        } else if(gamepad1.a){
+            turret.moveLink("close");
+        }
+        if(gamepad1.left_trigger_pressed){
+            turret.moveBlockerManual(1);
+        } else if(gamepad1.left_bumper){
+            turret.moveBlockerManual(0);
         }
 
+        if(gamepad2.b){
+            turret.moveTurretManual(1);
+        } else if(gamepad2.x){
+            turret.moveTurretManual(0);
+        }
+        if(gamepad2.y){
+            turret.moveLinkManual(1);
+        } else if(gamepad2.a){
+            turret.moveLinkManual(0);
+        }
+        if(gamepad2.left_trigger_pressed){
+            turret.moveBlockerManual(1);
+        } else if(gamepad2.left_bumper){
+            turret.moveBlockerManual(0);
+        }
+        telemetry.addData("Target Position(block)", turret.blocker.getPosition());
+        telemetry.addData("Target Position(linkage)", turret.linkage.getPosition());
+        telemetry.addData("Target Position(turret)", turret.turretServo.getPosition());
+        telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
+        telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
+        telemetry.update();
+        /*
         if (gamepad1.a && pressed % 2 == 0){
             loader.position("open");
             pressed+=1;
@@ -55,8 +94,8 @@ public class teleop extends OpMode {
         } else if(gamepad1.y){
             loader.positionManual(1);
         }
+        */
         follower.update();
-
 
     }
 }
