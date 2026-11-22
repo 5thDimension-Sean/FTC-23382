@@ -62,7 +62,7 @@ public class turret {
         if(position.equalsIgnoreCase("open")){
             blocker.setPosition(0.17);
         } else if(position.equalsIgnoreCase("close")){
-            linkage.setPosition(0.47);
+            blocker.setPosition(0.47);
         }
     }
     /**
