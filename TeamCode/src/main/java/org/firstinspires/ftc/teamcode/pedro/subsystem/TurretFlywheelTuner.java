@@ -6,19 +6,19 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.pedro.teleop.teleop;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Turret Flywheel PIDF Tuner", group = "Calibration")
 public class TurretFlywheelTuner extends OpMode {
-    // Starting guesses for the FTC hub's velocity controller. Tune on the robot.
-    private static final double START_KP = 1.0;
-    private static final double START_KI = 0.0;
-    private static final double START_KD = 0.0;
-    private static final double START_KF = 0.0;
     private static final double MAX_TEST_TICKS_PER_SECOND = 500.0;
 
     private final String[] gainNames = {"P", "I", "D", "F"};
-    private final double[] gains = {START_KP, START_KI, START_KD, START_KF};
+    private final double[] gains = {
+            Constants.TURRET_FLYWHEEL_KP,
+            Constants.TURRET_FLYWHEEL_KI,
+            Constants.TURRET_FLYWHEEL_KD,
+            Constants.TURRET_FLYWHEEL_KF
+    };
     private DcMotorEx flywheel;
     private DcMotor.RunMode previousMode;
     private PIDFCoefficients previousGains;
@@ -30,13 +30,13 @@ public class TurretFlywheelTuner extends OpMode {
 
     @Override
     public void init() {
-        flywheel = hardwareMap.get(DcMotorEx.class, "turret");
+        flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         previousMode = flywheel.getMode();
         previousGains = flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setPower(0);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         applyGains();
-        telemetry.addLine("Confirm the flywheel motor is configured as turrets and has an encoder.");
+        telemetry.addData("Flywheel motor", Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         telemetry.update();
     }
 
@@ -71,7 +71,10 @@ public class TurretFlywheelTuner extends OpMode {
         telemetry.addLine("Hold RB and squeeze RT to run. Release either to stop.");
         telemetry.addLine("D-pad left/right selects gain, up/down adjusts. Hold LB for larger steps.");
         telemetry.addData("Selected gain", gainNames[selectedGain]);
-        telemetry.addData("PIDF", "%.2f / %.2f / %.2f / %.2f", gains[0], gains[1], gains[2], gains[3]);
+        telemetry.addData("TURRET_FLYWHEEL_KP", gains[0]);
+        telemetry.addData("TURRET_FLYWHEEL_KI", gains[1]);
+        telemetry.addData("TURRET_FLYWHEEL_KD", gains[2]);
+        telemetry.addData("TURRET_FLYWHEEL_KF", gains[3]);
         telemetry.addData("Target (ticks/s)", "%.1f", target);
         telemetry.addData("Measured (ticks/s)", "%.1f", measured);
         telemetry.addData("Error (ticks/s)", "%.1f", target - measured);

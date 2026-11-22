@@ -22,6 +22,12 @@ public class Constants {
     public static final double nectarWeight = 41.28; //weight in g
     public static final double nectarDiameter = 3.6; //length in cm
 
+    public static final String TURRET_FLYWHEEL_MOTOR_NAME = "turret";
+    public static final double TURRET_FLYWHEEL_KP = 1.0;
+    public static final double TURRET_FLYWHEEL_KI = 0.0;
+    public static final double TURRET_FLYWHEEL_KD = 0.0;
+    public static final double TURRET_FLYWHEEL_KF = 0.0;
+
 
     public static Follower create(HardwareMap h) {
         return new Follower(
