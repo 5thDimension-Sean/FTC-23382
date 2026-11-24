@@ -31,6 +31,10 @@ public class LimelightTurretAimStep extends OpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         turretServo = hardwareMap.tryGet(Servo.class, "turretServo");
+        if (turretServo != null) {
+            telemetry.addData("Servo command at INIT", "%.5f", turretServo.getPosition())
+                    .setRetained(true);
+        }
         telemetry.addLine("PLAY captures one correction. Live tx continues updating.");
         telemetry.update();
     }
@@ -87,7 +91,9 @@ public class LimelightTurretAimStep extends OpMode {
         }
         double current = turretServo.getPosition();
         if (!(current >= MIN_SERVO && current <= MAX_SERVO)) {
-            return "Holding: current servo command is outside the measured limits";
+            return String.format(java.util.Locale.US,
+                    "Holding: servo %.5f is outside %.4f to %.4f",
+                    current, MIN_SERVO, MAX_SERVO);
         }
         double next = Range.clip(current + step, MIN_SERVO, MAX_SERVO);
         if (next == current) {
