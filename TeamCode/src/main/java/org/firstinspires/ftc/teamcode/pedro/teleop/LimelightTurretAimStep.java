@@ -5,8 +5,11 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Limelight Turret Aim Step", group = "Calibration")
 public class LimelightTurretAimStep extends OpMode {
@@ -19,19 +22,21 @@ public class LimelightTurretAimStep extends OpMode {
     private static final double GAIN = 0.001;
     private static final double MAX_STEP = 0.005;
     // Verified clearance for the one-step test around the shooting position.
-    private static final double MIN_SERVO = 0.3545;
-    private static final double MAX_SERVO = 0.3645;
+    private static final double MIN_SERVO = 0.32;
+    private static final double MAX_SERVO = 0.38;
 
     private Limelight3A limelight;
-    private Servo turretServo;
+    private ServoImplEx turretServo;
     private boolean sampled;
 
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
-        turretServo = hardwareMap.tryGet(Servo.class, "turretServo");
+        turretServo = hardwareMap.tryGet(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
         if (turretServo != null) {
+            // Use the same pulse range as TeleOp, where the limits were measured.
+            turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
             telemetry.addData("Servo command at INIT", "%.5f", turretServo.getPosition())
                     .setRetained(true);
         }
