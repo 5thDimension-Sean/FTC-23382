@@ -18,9 +18,9 @@ public class LimelightTurretAimStep extends OpMode {
     private static final int SERVO_DIRECTION = -1;
     private static final double GAIN = 0.001;
     private static final double MAX_STEP = 0.005;
-    // Set these to measured safe commands to enable the single move.
-    private static final double MIN_SERVO = Double.NaN;
-    private static final double MAX_SERVO = Double.NaN;
+    // Verified clearance for the one-step test around the shooting position.
+    private static final double MIN_SERVO = 0.3545;
+    private static final double MAX_SERVO = 0.3645;
 
     private Limelight3A limelight;
     private Servo turretServo;
