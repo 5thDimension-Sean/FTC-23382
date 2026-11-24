@@ -5,6 +5,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
@@ -13,8 +18,13 @@ public class turret {
     public ServoImplEx linkage;
     public ServoImplEx turretServo;
     public ServoImplEx blocker;
+    Limelight3A limelight;
 
     public void init(HardwareMap hardwareMap){
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(100);
+        limelight.start();
+        limelight.pipelineSwitch(0);
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         linkage = hardwareMap.get(ServoImplEx.class, "linkage");
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
