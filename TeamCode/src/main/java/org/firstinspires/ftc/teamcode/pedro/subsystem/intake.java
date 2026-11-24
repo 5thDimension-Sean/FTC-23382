@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.pedro.subsystem;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
 public class intake {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
@@ -13,8 +15,8 @@ public class intake {
     private static final double RAMP_RATE = 6.5;
 
     public void init(HardwareMap hardwareMap){
-        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
-        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
+        intakeLeft = hardwareMap.get(DcMotor.class, Constants.INTAKE_LEFT_MOTOR_NAME);
+        intakeRight = hardwareMap.get(DcMotor.class, Constants.INTAKE_RIGHT_MOTOR_NAME);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
     }
 

@@ -21,16 +21,16 @@ public class turret {
     Limelight3A limelight;
 
     public void init(HardwareMap hardwareMap){
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(0);
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
-        linkage = hardwareMap.get(ServoImplEx.class, "linkage");
+        linkage = hardwareMap.get(ServoImplEx.class, Constants.TURRET_LINKAGE_SERVO_NAME);
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
-        turretServo = hardwareMap.get(ServoImplEx.class, "turretServo");
+        turretServo = hardwareMap.get(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
         turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
-        blocker = hardwareMap.get(ServoImplEx.class, "blocker");
+        blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
         blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
         flywheel.setPower(0);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

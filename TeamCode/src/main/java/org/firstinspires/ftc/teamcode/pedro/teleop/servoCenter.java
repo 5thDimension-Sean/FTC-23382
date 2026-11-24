@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
 @TeleOp(name = "center speed Servo", group = "Calibration")
 public class servoCenter extends LinearOpMode {
 
@@ -12,7 +14,7 @@ public class servoCenter extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        blocker = hardwareMap.get(ServoImplEx.class, "blocker");
+        blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
         blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
         telemetry.addLine("Press PLAY to move servo to exact 0.5 center (2.5 turns).");
         telemetry.update();
