@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.pedro.subsystem;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -25,13 +29,17 @@ public class turret {
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(0);
-        flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
+
         linkage = hardwareMap.get(ServoImplEx.class, Constants.TURRET_LINKAGE_SERVO_NAME);
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
+
         turretServo = hardwareMap.get(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
         turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+
         blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
         blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
+
+        flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         flywheel.setPower(0);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setVelocityPIDFCoefficients(
