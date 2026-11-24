@@ -33,13 +33,20 @@ public class LimelightAprilTagTest extends OpMode {
         if (result == null) {
             telemetry.addData("Target", "Waiting for camera data");
         } else {
+
             long ageMs = result.getStaleness();
             telemetry.addData("Result age (ms)", ageMs);
+
             if (ageMs > MAX_RESULT_AGE_MS) {
+
                 telemetry.addData("Target", "Camera data is stale");
+
             } else if (!result.isValid() || result.getFiducialResults().isEmpty()) {
+
                 telemetry.addData("Target", "No AprilTag visible");
+
             } else {
+
                 telemetry.addData("Target", "AprilTag detected");
                 for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
                     telemetry.addData("Tag " + tag.getFiducialId(), "tx %.2f°, ty %.2f°",
