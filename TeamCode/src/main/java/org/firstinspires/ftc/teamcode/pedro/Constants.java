@@ -22,7 +22,23 @@ public class Constants {
     public static final double nectarWeight = 41.28; //weight in g
     public static final double nectarDiameter = 3.6; //length in cm
 
+    public static final String FRONT_LEFT_DRIVE_MOTOR_NAME = "frontleft";
+    public static final String FRONT_RIGHT_DRIVE_MOTOR_NAME = "frontright";
+    public static final String BACK_LEFT_DRIVE_MOTOR_NAME = "backleft";
+    public static final String BACK_RIGHT_DRIVE_MOTOR_NAME = "backright";
+    public static final String PINPOINT_NAME = "pinpoint";
+    public static final String LIMELIGHT_NAME = "limelight";
+
+    public static final String INTAKE_LEFT_MOTOR_NAME = "intakeLeft";
+    public static final String INTAKE_RIGHT_MOTOR_NAME = "intakeRight";
+    public static final String LOADER_LEFT_SERVO_NAME = "loaderLeft";
+    public static final String LOADER_RIGHT_SERVO_NAME = "loaderRight";
+
     public static final String TURRET_FLYWHEEL_MOTOR_NAME = "turret";
+    public static final String TURRET_LINKAGE_SERVO_NAME = "linkage";
+    public static final String TURRET_ROTATION_SERVO_NAME = "turretServo";
+    public static final String TURRET_BLOCKER_SERVO_NAME = "blocker";
+
     public static final int TURRET_FLYWHEEL_TICKS_PER_REVOLUTION = 28; // goBILDA 5203-2402-0001
     public static final double TURRET_FLYWHEEL_MAX_TEST_RPM = 5000.0;
 
@@ -41,10 +57,10 @@ public class Constants {
     }
 
     public static MecanumConfig drivetrainConfig = new MecanumConfig(c -> {
-        c.frontLeftName.set("frontleft");
-        c.frontRightName.set("frontright");
-        c.backLeftName.set("backleft");
-        c.backRightName.set("backright");
+        c.frontLeftName.set(Constants.FRONT_LEFT_DRIVE_MOTOR_NAME);
+        c.frontRightName.set(Constants.FRONT_RIGHT_DRIVE_MOTOR_NAME);
+        c.backLeftName.set(Constants.BACK_LEFT_DRIVE_MOTOR_NAME);
+        c.backRightName.set(Constants.BACK_RIGHT_DRIVE_MOTOR_NAME);
         c.frontLeftDirection.set(DcMotorSimple.Direction.REVERSE);
         c.frontRightDirection.set(DcMotorSimple.Direction.FORWARD);
         c.backLeftDirection.set(DcMotorSimple.Direction.REVERSE);
@@ -52,7 +68,7 @@ public class Constants {
     });
     //fix
     public static PinpointConfig localizerConfig = new PinpointConfig(c -> {
-        c.name.set("pinpoint");
+        c.name.set(Constants.PINPOINT_NAME);
         c.podType.set(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         c.xPodOffset.set(-3.25492126);
         c.yPodOffset.set(-4.293885);

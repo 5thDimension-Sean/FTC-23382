@@ -1,22 +1,45 @@
 package org.firstinspires.ftc.teamcode.pedro.subsystem;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 public class turret {
     private DcMotorEx flywheel;
-    private ServoImplEx linkage;
+    public ServoImplEx linkage;
+    public ServoImplEx turretServo;
+    public ServoImplEx blocker;
+    Limelight3A limelight;
 
     public void init(HardwareMap hardwareMap){
-        flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
-        linkage = hardwareMap.get(ServoImplEx.class, "linkage");
+        limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
+        limelight.setPollRateHz(100);
+        limelight.start();
+        limelight.pipelineSwitch(0);
+
+        linkage = hardwareMap.get(ServoImplEx.class, Constants.TURRET_LINKAGE_SERVO_NAME);
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
 
+        turretServo = hardwareMap.get(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
+        turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+
+        blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
+        blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
+
+        flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         flywheel.setPower(0);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setVelocityPIDFCoefficients(
@@ -39,13 +62,25 @@ public class turret {
     /**
      * Moves the linkage servo to a predefined position.
      *
-     * @param position "open" (1.0) or "close" (0.0), case-insensitive.
+     * @param position "open" (0.61.0) or "close" (0.0), case-insensitive.
      */
-    public void moveLoader(String position){
+    public void moveLink(String position){
         if(position.equalsIgnoreCase("open")){
-            linkage.setPosition(1.0);
+            linkage.setPosition(0.61);
         } else if(position.equalsIgnoreCase("close")){
             linkage.setPosition(0.0);
+        }
+    }
+    /**
+     * Moves the blocker servo to a predefined position.
+     *
+     * @param position "open" (0.47) or "close" (0.17), case-insensitive.
+     */
+    public void moveBlocker(String position){
+        if(position.equalsIgnoreCase("open")){
+            blocker.setPosition(0.17);
+        } else if(position.equalsIgnoreCase("close")){
+            blocker.setPosition(0.47);
         }
     }
     /**
@@ -53,12 +88,35 @@ public class turret {
      *
      * @param direction 0 to decrease position, 1 to increase position.
      */
-    public void moveLoaderManual(int direction){
+    public void moveLinkManual(int direction){
         if(direction == 0){
-            linkage.setPosition(linkage.getPosition()-0.01);
+            linkage.setPosition(linkage.getPosition()-0.005);
         }else if(direction == 1){
-            linkage.setPosition(linkage.getPosition()+0.01);
+            linkage.setPosition(linkage.getPosition()+0.005);
         }
     }
-
+    /**
+     * Incrementally adjusts the turret servo position by 0.01 per call.
+     *
+     * @param direction 0 to go left, 1 to go right.
+     */
+    public void moveTurretManual(int direction){
+        if(direction == 0){
+            turretServo.setPosition(turretServo.getPosition()-0.005);
+        }else if(direction == 1){
+            turretServo.setPosition(turretServo.getPosition()+0.005);
+        }
+    }
+    /**
+     * Incrementally adjusts the blocker servo position by 0.01 per call.
+     *
+     * @param direction 0 to go left, 1 to go right.
+     */
+    public void moveBlockerManual(int direction){
+        if(direction == 0){
+            blocker.setPosition(blocker.getPosition()-0.005);
+        }else if(direction == 1){
+            blocker.setPosition(blocker.getPosition()+0.005);
+        }
+    }
 }

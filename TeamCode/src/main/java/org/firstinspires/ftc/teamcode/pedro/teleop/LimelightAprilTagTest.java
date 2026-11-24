@@ -6,6 +6,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
 @TeleOp(name = "Limelight AprilTag Test", group = "Calibration")
 public class LimelightAprilTagTest extends OpMode {
     private static final int PIPELINE = 0;
@@ -15,7 +17,7 @@ public class LimelightAprilTagTest extends OpMode {
 
     @Override
     public void init() {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
         limelight.pipelineSwitch(PIPELINE);
         telemetry.addData("Pipeline", PIPELINE);
         telemetry.addLine("Press PLAY to read AprilTags.");

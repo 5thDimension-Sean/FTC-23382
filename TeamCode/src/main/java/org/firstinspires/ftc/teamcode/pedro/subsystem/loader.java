@@ -6,13 +6,15 @@ import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
 public class loader {
-    private ServoImplEx loaderLeft;
-    private ServoImplEx loaderRight;
+    public ServoImplEx loaderLeft;
+    public ServoImplEx loaderRight;
 
     public void init(HardwareMap hardwareMap){
-        loaderLeft = hardwareMap.get(ServoImplEx.class, "loaderLeft");
-        loaderRight = hardwareMap.get(ServoImplEx.class, "loaderRight");
+        loaderLeft = hardwareMap.get(ServoImplEx.class, Constants.LOADER_LEFT_SERVO_NAME);
+        loaderRight = hardwareMap.get(ServoImplEx.class, Constants.LOADER_RIGHT_SERVO_NAME);
         loaderLeft.setPwmRange(new PwmControl.PwmRange(500, 2500));
         loaderRight.setPwmRange(new PwmControl.PwmRange(500, 2500));
     }

@@ -8,6 +8,7 @@ import com.pedropathing.tuning.autotune.Procedure;
 import com.pedropathing.tuning.autotune.TuningOpMode;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 import java.util.*;
 
@@ -24,7 +25,7 @@ public class PinpointTuner extends Procedure {
     @Override
     public void run() throws InterruptedException {
         Inputs inputs = inputs("Setup", "Set Pinpoint HardwareMap Name and Odometry Pod Type");
-        Inputs.Field<String> pinpointName = inputs.s("HardwareMap Name").withDefault("pinpoint");
+        Inputs.Field<String> pinpointName = inputs.s("HardwareMap Name").withDefault(Constants.PINPOINT_NAME);
         Inputs.Field<PodType> podType = inputs.e("Odometry Pod Type", PodType.class).withDefault(PodType.FOUR_BAR);
         awaitInputs(inputs);
 

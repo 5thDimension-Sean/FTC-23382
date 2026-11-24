@@ -5,22 +5,24 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
-@TeleOp(name = "Zero 5-Turn Servo", group = "Calibration")
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
+@TeleOp(name = "center speed Servo", group = "Calibration")
 public class servoCenter extends LinearOpMode {
 
-    private ServoImplEx turretServo;
+    private ServoImplEx blocker;
 
     @Override
     public void runOpMode() {
-        turretServo = hardwareMap.get(ServoImplEx.class, "turretServo");
-        turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
+        blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
         telemetry.addLine("Press PLAY to move servo to exact 0.5 center (2.5 turns).");
         telemetry.update();
         waitForStart();
-        turretServo.setPosition(0.5);
+        blocker.setPosition(0.5);
 
         while (opModeIsActive()) {
-            telemetry.addData("Target Position", turretServo.getPosition());
+            telemetry.addData("Target Position", blocker.getPosition());
             telemetry.addLine("Servo is now centered. Power off robot and attach horn.");
             telemetry.update();
         }

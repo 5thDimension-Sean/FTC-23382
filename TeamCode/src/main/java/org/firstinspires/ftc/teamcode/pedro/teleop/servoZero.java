@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
-@TeleOp(name = "half 5-Turn Servo", group = "Calibration")
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
+@TeleOp(name = "zero 5-Turn Servo", group = "Calibration")
 public class servoZero extends LinearOpMode {
 
     private ServoImplEx loaderLeft;
@@ -13,8 +15,8 @@ public class servoZero extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        loaderLeft = hardwareMap.get(ServoImplEx.class, "loaderLeft");
-        loaderRight = hardwareMap.get(ServoImplEx.class, "loaderRight");
+        loaderLeft = hardwareMap.get(ServoImplEx.class, Constants.LOADER_LEFT_SERVO_NAME);
+        loaderRight = hardwareMap.get(ServoImplEx.class, Constants.LOADER_RIGHT_SERVO_NAME);
         loaderLeft.setPwmRange(new PwmControl.PwmRange(500, 2500));
         loaderRight.setPwmRange(new PwmControl.PwmRange(500, 2500));
         telemetry.addLine("Press PLAY to move servo to exact 0.5 center (2.5 turns).");
