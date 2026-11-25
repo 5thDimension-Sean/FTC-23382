@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
@@ -38,6 +39,7 @@ public class turret {
 
         blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
         blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        blocker.setDirection(Servo.Direction.REVERSE);
 
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         flywheel.setPower(0);
