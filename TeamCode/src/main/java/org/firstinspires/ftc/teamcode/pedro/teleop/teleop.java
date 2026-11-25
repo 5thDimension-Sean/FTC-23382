@@ -23,6 +23,7 @@ public class teleop extends OpMode {
     private boolean previousAllianceButton;
     private boolean handsFreeAim;
     private boolean previousAimButton;
+    private boolean recenteredAtStart;
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
@@ -41,6 +42,7 @@ public class teleop extends OpMode {
     public void start() {
         previousAimButton = gamepad1.right_stick_button;
         previousAllianceButton = gamepad1.dpad_down;
+        recenteredAtStart = hiveAim.restoreCenterIfNeeded();
     }
 
     @Override
@@ -125,6 +127,10 @@ public class teleop extends OpMode {
         previousAllianceButton = allianceButton;
         telemetry.addData("Hive alliance (D-pad down)", blueAlliance ? "Blue" : "Red");
         telemetry.addData("Hive calibration", hiveAim.isCalibrated() ? "Saved" : "Required");
+        if (recenteredAtStart) {
+            telemetry.addData("Turret startup", "Restored measured center %.4f",
+                    HiveTurretAim.STRAIGHT_AHEAD_POSITION);
+        }
         LLResult frame = visionFrames.freshResult(turret.getLimelight());
         HiveOpeningVision.Opening opening = HiveOpeningVision.find(frame, blueAlliance, telemetry, false);
         boolean manual = gamepad1.b || gamepad1.x || gamepad2.b || gamepad2.x;

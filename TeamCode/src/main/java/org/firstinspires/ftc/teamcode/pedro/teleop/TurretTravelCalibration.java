@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Turret Travel Calibration", group = "Calibration")
 public class TurretTravelCalibration extends OpMode {
-    private static final double MEASURED_CENTER = 0.4333;
     private static final double FINE_STEP = 0.001;
     private static final double COARSE_STEP = 0.005;
 
@@ -44,7 +43,7 @@ public class TurretTravelCalibration extends OpMode {
         boolean increase = gamepad1.dpad_right && !previousIncrease;
         boolean recover = gamepad1.left_bumper && gamepad1.right_bumper && gamepad1.y;
         if (recover && !previousRecovery && !gamepad1.dpad_left && !gamepad1.dpad_right) {
-            commandPosition(MEASURED_CENTER);
+            commandPosition(HiveTurretAim.STRAIGHT_AHEAD_POSITION);
             status = "Measured center commanded.";
         } else if (!recover && gamepad1.left_bumper && decrease != increase
                 && gamepad1.dpad_left != gamepad1.dpad_right) {

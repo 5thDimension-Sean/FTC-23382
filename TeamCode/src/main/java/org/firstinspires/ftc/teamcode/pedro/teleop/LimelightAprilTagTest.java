@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.pedro.teleop;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
+@Disabled
 @TeleOp(name = "Limelight AprilTag Test", group = "Calibration")
 public class LimelightAprilTagTest extends OpMode {
     private static final int PIPELINE = 0;

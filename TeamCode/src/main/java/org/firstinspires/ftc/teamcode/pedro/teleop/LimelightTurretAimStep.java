@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedro.teleop;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PwmControl;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
+@Disabled
 @TeleOp(name = "Limelight Turret Aim Step", group = "Calibration")
 public class LimelightTurretAimStep extends OpMode {
     private static final int TAG_ID = 42;

@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 final class HiveTurretAim {
+    static final double STRAIGHT_AHEAD_POSITION = 0.4333;
     private static final double MIN_POSITION = 0.386;
     private static final double MAX_POSITION = 0.624;
     private static final double POSITION_TOLERANCE = 0.00005;
@@ -117,6 +118,14 @@ final class HiveTurretAim {
             lastFrame = frame.getTimestamp();
         }
         return "Tracking";
+    }
+
+    boolean restoreCenterIfNeeded() {
+        if (withinTravel(servo.getPosition())) {
+            return false;
+        }
+        servo.setPosition(STRAIGHT_AHEAD_POSITION);
+        return true;
     }
 
     void manualStep(boolean increase) {

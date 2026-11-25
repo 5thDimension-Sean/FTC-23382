@@ -3,12 +3,10 @@ package org.firstinspires.ftc.teamcode.pedro.teleop;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@TeleOp(name = "Limelight Hive Opening Preview", group = "Calibration")
-public class LimelightHiveOpeningPreview extends OpMode {
+public abstract class LimelightHiveOpeningPreview extends OpMode {
     private final LimelightFrames frames = new LimelightFrames();
     private Limelight3A limelight;
     private boolean blue = true;
@@ -37,8 +35,7 @@ public class LimelightHiveOpeningPreview extends OpMode {
         telemetry.update();
     }
 
-    protected void handleOpening(LLResult frame, HiveOpeningVision.Opening opening) {
-    }
+    protected abstract void handleOpening(LLResult frame, HiveOpeningVision.Opening opening);
 
     @Override
     public void stop() {
