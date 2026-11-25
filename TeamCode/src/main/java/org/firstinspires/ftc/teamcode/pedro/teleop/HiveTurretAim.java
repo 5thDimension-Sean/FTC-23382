@@ -16,7 +16,9 @@ final class HiveTurretAim {
     private static final double FINE_STEP = 0.001;
     private static final double MAX_TRACKING_STEP = 0.003;
     private static final double TRACKING_GAIN = 0.00045;
-    private static final double DEADBAND_DEGREES = 1.0;
+    private static final double STOP_ERROR_DEGREES = 0.8;
+    private static final double START_ERROR_DEGREES = 1.6;
+    private static final double NEAR_STEP = 0.0005;
     private static final long STEP_INTERVAL_NANOS = 60_000_000L;
     private static final long FAST_STEP_INTERVAL_NANOS = 45_000_000L;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
@@ -27,6 +29,7 @@ final class HiveTurretAim {
     private double intercept;
     private double lastFrame = Double.NaN;
     private long nextStep;
+    private boolean correcting;
 
     HiveTurretAim(ServoImplEx servo, Context context) {
         this.servo = servo;
@@ -65,6 +68,9 @@ final class HiveTurretAim {
                 telemetry.addData("Tracking error (deg)", "%+.2f", error);
             }
         }
+        if (manual || !requested || opening == null) {
+            correcting = false;
+        }
         if (manual) {
             return "Manual";
         }
@@ -82,13 +88,16 @@ final class HiveTurretAim {
             return String.format(java.util.Locale.US, "Holding: servo command outside %.4f to %.4f",
                     MIN_POSITION, MAX_POSITION);
         }
-        if (Math.abs(error) <= DEADBAND_DEGREES) {
-            return "Holding: within 1 degree";
-        }
         double magnitude = Math.abs(error);
+        double threshold = correcting ? STOP_ERROR_DEGREES : START_ERROR_DEGREES;
+        if (magnitude <= threshold) {
+            correcting = false;
+            return "Holding: aim settled";
+        }
+        correcting = true;
         boolean coarse = magnitude >= 4.0;
         double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
-                : Range.clip(magnitude * 0.00035, FINE_STEP, MAX_TRACKING_STEP);
+                : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
         long interval = coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
         double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
         if (Math.abs(next - position) <= POSITION_TOLERANCE) {
