@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedro.teleop;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,6 +19,8 @@ public class teleop extends OpMode {
 
     private Follower follower;
     private final LimelightFrames visionFrames = new LimelightFrames();
+    private final HiveOdometryAim hiveOdometry = new HiveOdometryAim();
+    private boolean previousOdometryButton;
     private HiveTurretAim hiveAim;
     private boolean blueAlliance = true;
     private boolean previousAllianceButton;
@@ -41,6 +44,7 @@ public class teleop extends OpMode {
     @Override
     public void start() {
         previousAimButton = gamepad1.right_stick_button;
+        previousOdometryButton = gamepad1.left_stick_button;
         previousAllianceButton = gamepad1.dpad_down;
         recenteredAtStart = hiveAim.restoreCenterIfNeeded();
     }
@@ -123,6 +127,7 @@ public class teleop extends OpMode {
         boolean allianceButton = gamepad1.dpad_down;
         if (allianceButton && !previousAllianceButton) {
             blueAlliance = !blueAlliance;
+            hiveOdometry.clearLastSeen();
         }
         previousAllianceButton = allianceButton;
         telemetry.addData("Hive alliance (D-pad down)", blueAlliance ? "Blue" : "Red");
@@ -142,9 +147,27 @@ public class teleop extends OpMode {
         }
         previousAimButton = aimButton;
         telemetry.addData("Hands-free aim (R3)", handsFreeAim ? "On" : "Off");
-        boolean track = handsFreeAim || gamepad2.right_bumper;
-        telemetry.addData("Hive aim", hiveAim.update(frame, opening,
-                track && !allianceButton, manual, driveInputActive(), telemetry));
+        boolean odometryButton = gamepad1.left_stick_button;
+        boolean capture = odometryButton && !previousOdometryButton;
+        previousOdometryButton = odometryButton;
+        boolean driving = driveInputActive();
+        boolean track = (handsFreeAim || gamepad2.right_bumper) && !allianceButton && !capture;
+        Pose pose = follower.pose();
+        if (capture && !handsFreeAim && !gamepad2.right_bumper && !manual && !driving) {
+            hiveOdometry.captureNext(pose, opening, turret.turretServo.getPosition());
+        }
+        if (!allianceButton) {
+            hiveOdometry.observe(opening);
+        }
+        String status = hiveAim.update(frame, opening, track, manual, driving, telemetry);
+        if (track && !manual && opening == null && hiveAim.isCalibrated()) {
+            status = hiveOdometry.reacquire(pose, hiveAim);
+        }
+        telemetry.addData("Hive aim", status);
+        telemetry.addData("Hive odometry (L3)", hiveOdometry.status());
+        if (track && opening == null) {
+            hiveOdometry.showPrediction(pose, telemetry);
+        }
     }
 
     private boolean driveInputActive() {
