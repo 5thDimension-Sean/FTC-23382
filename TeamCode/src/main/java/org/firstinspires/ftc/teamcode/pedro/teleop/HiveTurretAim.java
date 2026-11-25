@@ -46,6 +46,9 @@ final class HiveTurretAim {
     private double previousError = Double.NaN;
     private double olderError = Double.NaN;
     private double filteredError;
+    private int restartFrameCount;
+    private int restartDirection;
+    private double lastRestartFrame;
 
     HiveTurretAim(ServoImplEx servo, Context context) {
         this.servo = servo;
@@ -102,6 +105,7 @@ final class HiveTurretAim {
         }
         if (manual || !requested || opening == null) {
             correcting = false;
+            restartFrameCount = 0;
         }
         if (manual) {
             return "Manual";
@@ -127,10 +131,17 @@ final class HiveTurretAim {
         if (magnitude <= threshold) {
             correcting = false;
             firstReversalFrame = Double.NaN;
+            restartFrameCount = 0;
+            return "Holding: aim settled";
+        }
+        boolean coarse = magnitude >= 4.0;
+        double timestamp = frame.getTimestamp();
+        int direction = error > 0 ? -1 : 1;
+        if (!correcting && !driving && !coarse && !confirmSettledRestart(direction, timestamp)) {
             return "Holding: aim settled";
         }
         correcting = true;
-        boolean coarse = magnitude >= 4.0;
+        restartFrameCount = 0;
         double drivingGain = coarse ? DRIVING_LARGE_ERROR_GAIN : DRIVING_GAIN;
         double step = driving
                 ? Range.clip(NEAR_STEP + (magnitude - DRIVING_STOP_ERROR_DEGREES) * drivingGain,
@@ -139,12 +150,10 @@ final class HiveTurretAim {
                         : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
         long interval = driving ? DRIVING_STEP_INTERVAL_NANOS
                 : coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
-        int direction = error > 0 ? -1 : 1;
         double next = Range.clip(position + direction * step, MIN_POSITION, MAX_POSITION);
         if (Math.abs(next - position) <= POSITION_TOLERANCE) {
             return "At travel limit";
         }
-        double timestamp = frame.getTimestamp();
         if (driving && !confirmDrivingDirection(direction, timestamp)) {
             return "Tracking: confirming direction";
         }
@@ -160,6 +169,7 @@ final class HiveTurretAim {
     private double filteredError(int cell, double timestamp, double measured) {
         if (filteredCell != cell) {
             filteredCell = cell;
+            restartFrameCount = 0;
             lastEstimateFrame = Double.NaN;
             previousError = Double.NaN;
             olderError = Double.NaN;
@@ -180,6 +190,18 @@ final class HiveTurretAim {
             lastEstimateFrame = timestamp;
         }
         return filteredError;
+    }
+
+    private boolean confirmSettledRestart(int direction, double timestamp) {
+        if (restartFrameCount == 0 || direction != restartDirection) {
+            restartDirection = direction;
+            restartFrameCount = 1;
+            lastRestartFrame = timestamp;
+        } else if (timestamp != lastRestartFrame) {
+            restartFrameCount++;
+            lastRestartFrame = timestamp;
+        }
+        return restartFrameCount >= 3;
     }
 
     private boolean confirmDrivingDirection(int direction, double timestamp) {
