@@ -16,7 +16,7 @@ public class LimelightHiveTrackingTest extends LimelightHiveOpeningPreview {
     private static final double MAX_POSITION = 0.38;
     private static final double MAX_STEP = 0.001;
     private static final double DEADBAND_DEGREES = 1.0;
-    private static final long STEP_INTERVAL_NANOS = 150_000_000L;
+    private static final long STEP_INTERVAL_NANOS = 60_000_000L;
 
     private Follower follower;
     private ServoImplEx servo;
