@@ -14,13 +14,16 @@ final class HiveTurretAim {
     private static final double MAX_POSITION = 0.624;
     private static final double POSITION_TOLERANCE = 0.00005;
     private static final double FINE_STEP = 0.001;
-    private static final double MAX_TRACKING_STEP = 0.003;
-    private static final double TRACKING_GAIN = 0.00045;
+    private static final double MAX_TRACKING_STEP = 0.0035;
+    private static final double TRACKING_GAIN = 0.00055;
     private static final double STOP_ERROR_DEGREES = 0.8;
     private static final double START_ERROR_DEGREES = 1.6;
     private static final double NEAR_STEP = 0.0005;
     private static final long STEP_INTERVAL_NANOS = 60_000_000L;
-    private static final long FAST_STEP_INTERVAL_NANOS = 45_000_000L;
+    private static final long FAST_STEP_INTERVAL_NANOS = 35_000_000L;
+    private static final long SEARCH_DELAY_NANOS = 500_000_000L;
+    private static final long SEARCH_INTERVAL_NANOS = 100_000_000L;
+    private static final double SEARCH_STEP = 0.002;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
 
     private final ServoImplEx servo;
@@ -30,6 +33,12 @@ final class HiveTurretAim {
     private double lastFrame = Double.NaN;
     private long nextStep;
     private boolean correcting;
+    private boolean sawTarget;
+    private long missingSince;
+    private int lastCorrectionDirection;
+    private int searchDirection;
+    private boolean searchReversed;
+    private boolean searchFinished;
 
     HiveTurretAim(ServoImplEx servo, Context context) {
         this.servo = servo;
@@ -57,7 +66,7 @@ final class HiveTurretAim {
     }
 
     String update(LLResult frame, HiveOpeningVision.Opening opening,
-            boolean requested, boolean manual, Telemetry telemetry) {
+            boolean requested, boolean manual, boolean searchClear, Telemetry telemetry) {
         double error = Double.NaN;
         if (opening != null) {
             telemetry.addData("Opening depth (in)", "%.1f", opening.z);
@@ -68,8 +77,11 @@ final class HiveTurretAim {
                 telemetry.addData("Tracking error (deg)", "%+.2f", error);
             }
         }
-        if (manual || !requested || opening == null) {
+        if (manual || !requested) {
             correcting = false;
+            sawTarget = false;
+            lastCorrectionDirection = 0;
+            resetSweep();
         }
         if (manual) {
             return "Manual";
@@ -80,14 +92,17 @@ final class HiveTurretAim {
         if (!isCalibrated()) {
             return "Holding: calibrate in Hive Tracking Test";
         }
-        if (opening == null) {
-            return "Holding: target lost";
-        }
         double position = servo.getPosition();
         if (!withinTravel(position)) {
             return String.format(java.util.Locale.US, "Holding: servo command outside %.4f to %.4f",
                     MIN_POSITION, MAX_POSITION);
         }
+        if (opening == null) {
+            correcting = false;
+            return lookForTarget(position, searchClear);
+        }
+        sawTarget = true;
+        resetSweep();
         double magnitude = Math.abs(error);
         double threshold = correcting ? STOP_ERROR_DEGREES : START_ERROR_DEGREES;
         if (magnitude <= threshold) {
@@ -95,6 +110,7 @@ final class HiveTurretAim {
             return "Holding: aim settled";
         }
         correcting = true;
+        lastCorrectionDirection = error > 0 ? -1 : 1;
         boolean coarse = magnitude >= 4.0;
         double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
                 : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
@@ -107,6 +123,49 @@ final class HiveTurretAim {
             lastFrame = frame.getTimestamp();
         }
         return "Tracking";
+    }
+
+    private String lookForTarget(double position, boolean searchClear) {
+        if (!searchClear || !sawTarget) {
+            missingSince = 0;
+            return "Holding: target lost";
+        }
+        if (searchFinished) {
+            return "Holding: no target after sweep";
+        }
+        long now = System.nanoTime();
+        if (missingSince == 0) {
+            missingSince = now;
+        }
+        if (now - missingSince < SEARCH_DELAY_NANOS) {
+            return "Holding: target lost";
+        }
+        if (searchDirection == 0) {
+            searchDirection = lastCorrectionDirection;
+            if (searchDirection == 0) {
+                searchDirection = MAX_POSITION - position >= position - MIN_POSITION ? 1 : -1;
+            }
+        }
+
+        double next = Range.clip(position + searchDirection * SEARCH_STEP, MIN_POSITION, MAX_POSITION);
+        if (Math.abs(next - position) <= POSITION_TOLERANCE) {
+            if (searchReversed) {
+                searchFinished = true;
+                return "Holding: no target after sweep";
+            }
+            searchDirection = -searchDirection;
+            searchReversed = true;
+        } else {
+            sendStep(next, SEARCH_INTERVAL_NANOS);
+        }
+        return "Searching for Hive";
+    }
+
+    private void resetSweep() {
+        missingSince = 0;
+        searchDirection = 0;
+        searchReversed = false;
+        searchFinished = false;
     }
 
     void manualStep(boolean increase) {
