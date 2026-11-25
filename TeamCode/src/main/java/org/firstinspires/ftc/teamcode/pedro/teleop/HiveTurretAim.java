@@ -24,9 +24,9 @@ final class HiveTurretAim {
     private static final long FAST_STEP_INTERVAL_NANOS = 35_000_000L;
     private static final double DRIVING_STOP_ERROR_DEGREES = 0.6;
     private static final double DRIVING_START_ERROR_DEGREES = 1.1;
-    private static final long DRIVING_FINE_INTERVAL_NANOS = 35_000_000L;
-    private static final long DRIVING_FAST_INTERVAL_NANOS = 25_000_000L;
-    private static final double DRIVING_FAST_STEP = 0.004;
+    private static final long DRIVING_STEP_INTERVAL_NANOS = 24_000_000L;
+    private static final double DRIVING_GAIN = 0.00065;
+    private static final double DRIVING_MAX_STEP = 0.0045;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
 
     private final ServoImplEx servo;
@@ -36,6 +36,8 @@ final class HiveTurretAim {
     private double lastFrame = Double.NaN;
     private long nextStep;
     private boolean correcting;
+    private int lastDrivingDirection;
+    private double firstReversalFrame = Double.NaN;
 
     HiveTurretAim(ServoImplEx servo, Context context) {
         this.servo = servo;
@@ -74,6 +76,10 @@ final class HiveTurretAim {
                 telemetry.addData("Tracking error (deg)", "%+.2f", error);
             }
         }
+        if (!driving || manual || !requested || opening == null) {
+            lastDrivingDirection = 0;
+            firstReversalFrame = Double.NaN;
+        }
         if (manual || !requested || opening == null) {
             correcting = false;
         }
@@ -100,24 +106,46 @@ final class HiveTurretAim {
         double threshold = correcting ? stopError : startError;
         if (magnitude <= threshold) {
             correcting = false;
+            firstReversalFrame = Double.NaN;
             return "Holding: aim settled";
         }
         correcting = true;
         boolean coarse = magnitude >= 4.0;
-        double maxStep = driving ? DRIVING_FAST_STEP : MAX_TRACKING_STEP;
-        double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, maxStep)
-                : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
-        long fineInterval = driving ? DRIVING_FINE_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
-        long fastInterval = driving ? DRIVING_FAST_INTERVAL_NANOS : FAST_STEP_INTERVAL_NANOS;
-        long interval = coarse ? fastInterval : fineInterval;
-        double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
+        double step = driving
+                ? Range.clip(NEAR_STEP + (magnitude - DRIVING_STOP_ERROR_DEGREES) * DRIVING_GAIN,
+                        NEAR_STEP, DRIVING_MAX_STEP)
+                : coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
+                        : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
+        long interval = driving ? DRIVING_STEP_INTERVAL_NANOS
+                : coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
+        int direction = error > 0 ? -1 : 1;
+        double next = Range.clip(position + direction * step, MIN_POSITION, MAX_POSITION);
         if (Math.abs(next - position) <= POSITION_TOLERANCE) {
             return "At travel limit";
         }
-        if (frame.getTimestamp() != lastFrame && sendStep(next, interval)) {
-            lastFrame = frame.getTimestamp();
+        double timestamp = frame.getTimestamp();
+        if (driving && !confirmDrivingDirection(direction, timestamp)) {
+            return "Tracking: confirming direction";
+        }
+        if (timestamp != lastFrame && sendStep(next, interval)) {
+            lastFrame = timestamp;
+            if (driving) {
+                lastDrivingDirection = direction;
+            }
         }
         return "Tracking";
+    }
+
+    private boolean confirmDrivingDirection(int direction, double timestamp) {
+        if (lastDrivingDirection == 0 || direction == lastDrivingDirection) {
+            firstReversalFrame = Double.NaN;
+            return true;
+        }
+        if (Double.isNaN(firstReversalFrame)) {
+            firstReversalFrame = timestamp;
+            return false;
+        }
+        return timestamp > firstReversalFrame;
     }
 
     boolean restoreCenterIfNeeded() {
