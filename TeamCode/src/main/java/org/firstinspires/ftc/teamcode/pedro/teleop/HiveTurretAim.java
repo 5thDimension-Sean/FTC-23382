@@ -12,7 +12,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 final class HiveTurretAim {
     private static final double MIN_POSITION = 0.32;
     private static final double MAX_POSITION = 0.38;
-    private static final double MAX_STEP = 0.001;
+    private static final double FINE_STEP = 0.001;
+    private static final double MAX_TRACKING_STEP = 0.0025;
+    private static final double TRACKING_GAIN = 0.00035;
     private static final double DEADBAND_DEGREES = 1.0;
     private static final long STEP_INTERVAL_NANOS = 60_000_000L;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
@@ -80,8 +82,8 @@ final class HiveTurretAim {
         if (Math.abs(error) <= DEADBAND_DEGREES) {
             return "Holding: within 1 degree";
         }
-        double next = Range.clip(position - Math.copySign(MAX_STEP, error),
-                MIN_POSITION, MAX_POSITION);
+        double step = Range.clip(Math.abs(error) * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP);
+        double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
         if (next == position) {
             return "At travel limit";
         }
@@ -94,7 +96,7 @@ final class HiveTurretAim {
     void manualStep(boolean increase) {
         double position = servo.getPosition();
         if (position >= MIN_POSITION && position <= MAX_POSITION) {
-            double delta = increase ? MAX_STEP : -MAX_STEP;
+            double delta = increase ? FINE_STEP : -FINE_STEP;
             double next = Range.clip(position + delta, MIN_POSITION, MAX_POSITION);
             if (next != position) {
                 sendStep(next);
