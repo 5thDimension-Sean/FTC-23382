@@ -11,12 +11,15 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Turret Travel Calibration", group = "Calibration")
 public class TurretTravelCalibration extends OpMode {
+    private static final double PWM_MIN_MICROS = 500;
+    private static final double PWM_MAX_MICROS = 2500;
     private static final double FINE_STEP = 0.001;
     private static final double COARSE_STEP = 0.005;
 
     private ServoImplEx servo;
     private boolean previousDecrease, previousIncrease, previousCenter, previousLeft, previousRight;
     private boolean previousRecovery;
+    private double requestedCommand = Double.NaN;
     private double center = Double.NaN;
     private double left = Double.NaN;
     private double right = Double.NaN;
@@ -25,6 +28,7 @@ public class TurretTravelCalibration extends OpMode {
     @Override
     public void init() {
         servo = hardwareMap.get(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
+        servo.setPwmRange(new PwmControl.PwmRange(PWM_MIN_MICROS, PWM_MAX_MICROS));
         DcMotorEx flywheel = hardwareMap.tryGet(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         if (flywheel != null) {
             flywheel.setPower(0);
@@ -50,7 +54,8 @@ public class TurretTravelCalibration extends OpMode {
             jog(increase);
         }
 
-        double command = servo.getPosition();
+        double pulseMicros = servo.getPulseWidth();
+        double command = readCommand(pulseMicros);
         if (!gamepad1.left_bumper && validCommand(command)) {
             if (gamepad1.a && !previousCenter) {
                 center = command;
@@ -67,7 +72,9 @@ public class TurretTravelCalibration extends OpMode {
         rememberButtons();
 
         telemetry.addData("Status", status);
-        telemetry.addData("Servo command", "%.4f", command);
+        telemetry.addData("Servo command", formatCommand(command));
+        telemetry.addData("Pulse width (us)", "%.0f", pulseMicros);
+        telemetry.addData("Requested command", formatCommand(requestedCommand));
         telemetry.addData("Straight ahead", formatCommand(center));
         telemetry.addData("Physical left / right", "%s / %s", formatCommand(left), formatCommand(right));
         if (Double.isFinite(left) && Double.isFinite(right)) {
@@ -82,7 +89,7 @@ public class TurretTravelCalibration extends OpMode {
     }
 
     private void jog(boolean increase) {
-        double current = servo.getPosition();
+        double current = readCommand(servo.getPulseWidth());
         if (!validCommand(current)) {
             status = "Servo command unavailable.";
             return;
@@ -94,12 +101,19 @@ public class TurretTravelCalibration extends OpMode {
             return;
         }
         commandPosition(next);
-        status = "One step commanded. Check clearance before the next step.";
+        status = increase ? "One increase commanded. Check clearance."
+                : "One decrease commanded. Check clearance.";
+    }
+
+    private double readCommand(double pulseMicros) {
+        return pulseMicros >= PWM_MIN_MICROS && pulseMicros <= PWM_MAX_MICROS
+                ? (pulseMicros - PWM_MIN_MICROS) / (PWM_MAX_MICROS - PWM_MIN_MICROS)
+                : Double.NaN;
     }
 
     private void commandPosition(double position) {
-        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
-        servo.setPosition(position);
+        requestedCommand = position;
+        servo.setPulseWidth(Math.round(PWM_MIN_MICROS + position * (PWM_MAX_MICROS - PWM_MIN_MICROS)));
     }
 
     private static boolean validCommand(double command) {
