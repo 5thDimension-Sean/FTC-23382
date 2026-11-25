@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 final class HiveTurretAim {
-    static final double STRAIGHT_AHEAD_POSITION = 0.4333;
+    static final double STRAIGHT_AHEAD_POSITION = 0.5000;
     private static final double MIN_POSITION = 0.386;
     private static final double MAX_POSITION = 0.624;
     private static final double POSITION_TOLERANCE = 0.00005;
@@ -221,6 +221,21 @@ final class HiveTurretAim {
             return false;
         }
         return timestamp > firstReversalFrame;
+    }
+
+    String nudgeTowardOdometry(double target) {
+        double position = servo.getPosition();
+        if (!withinTravel(position)) {
+            return "Holding: servo command outside travel";
+        }
+        double boundedTarget = Range.clip(target, MIN_POSITION, MAX_POSITION);
+        double delta = boundedTarget - position;
+        if (Math.abs(delta) <= POSITION_TOLERANCE) {
+            return target == boundedTarget ? "Holding: odometry bearing" : "At travel limit";
+        }
+        double step = Range.clip(delta, -0.003, 0.003);
+        sendStep(Range.clip(position + step, MIN_POSITION, MAX_POSITION), STEP_INTERVAL_NANOS);
+        return "Odometry: pointing toward Hive";
     }
 
     boolean restoreCenterIfNeeded() {
