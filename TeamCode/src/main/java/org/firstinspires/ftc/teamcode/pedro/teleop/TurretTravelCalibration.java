@@ -11,11 +11,13 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Turret Travel Calibration", group = "Calibration")
 public class TurretTravelCalibration extends OpMode {
+    private static final double MEASURED_CENTER = 0.4333;
     private static final double FINE_STEP = 0.001;
     private static final double COARSE_STEP = 0.005;
 
     private ServoImplEx servo;
     private boolean previousDecrease, previousIncrease, previousCenter, previousLeft, previousRight;
+    private boolean previousRecovery;
     private double center = Double.NaN;
     private double left = Double.NaN;
     private double right = Double.NaN;
@@ -40,7 +42,11 @@ public class TurretTravelCalibration extends OpMode {
     public void loop() {
         boolean decrease = gamepad1.dpad_left && !previousDecrease;
         boolean increase = gamepad1.dpad_right && !previousIncrease;
-        if (gamepad1.left_bumper && decrease != increase
+        boolean recover = gamepad1.left_bumper && gamepad1.right_bumper && gamepad1.y;
+        if (recover && !previousRecovery && !gamepad1.dpad_left && !gamepad1.dpad_right) {
+            commandPosition(MEASURED_CENTER);
+            status = "Measured center commanded.";
+        } else if (!recover && gamepad1.left_bumper && decrease != increase
                 && gamepad1.dpad_left != gamepad1.dpad_right) {
             jog(increase);
         }
@@ -72,6 +78,7 @@ public class TurretTravelCalibration extends OpMode {
         telemetry.addLine("Hold LB. Tap D-pad left/right for one decrease/increase.");
         telemetry.addLine("Hold RB too for 0.005 steps. Fine steps are 0.001.");
         telemetry.addLine("Release LB. A marks straight ahead, X marks left, B marks right.");
+        telemetry.addLine("Only if the shooter is already straight: hold LB+RB and tap Y to restore center.");
         telemetry.update();
     }
 
@@ -87,9 +94,13 @@ public class TurretTravelCalibration extends OpMode {
             status = "At the servo command boundary.";
             return;
         }
-        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
-        servo.setPosition(next);
+        commandPosition(next);
         status = "One step commanded. Check clearance before the next step.";
+    }
+
+    private void commandPosition(double position) {
+        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        servo.setPosition(position);
     }
 
     private static boolean validCommand(double command) {
@@ -107,5 +118,6 @@ public class TurretTravelCalibration extends OpMode {
         previousCenter = gamepad1.a;
         previousLeft = gamepad1.x;
         previousRight = gamepad1.b;
+        previousRecovery = gamepad1.left_bumper && gamepad1.right_bumper && gamepad1.y;
     }
 }
