@@ -25,7 +25,9 @@ final class HiveTurretAim {
     private static final double DRIVING_STOP_ERROR_DEGREES = 0.6;
     private static final double DRIVING_START_ERROR_DEGREES = 1.1;
     private static final long DRIVING_STEP_INTERVAL_NANOS = 24_000_000L;
-    private static final double DRIVING_GAIN = 0.00065;
+    private static final double NEAR_GAIN = 0.0002;
+    private static final long DRIVING_FINE_SETTLE_NANOS = 60_000_000L;
+    private static final long STATIONARY_FINE_SETTLE_NANOS = 100_000_000L;
     private static final double DRIVING_MAX_STEP = 0.005;
     private static final double DRIVING_LARGE_ERROR_GAIN = 0.00080;
     private static final long DRIVE_RELEASE_DELAY_NANOS = 150_000_000L;
@@ -39,6 +41,7 @@ final class HiveTurretAim {
     private long nextStep;
     private boolean correcting;
     private int lastDrivingDirection;
+    private int lastCorrectionDirection;
     private double firstReversalFrame = Double.NaN;
     private long lastDriveInputNanos;
     private int filteredCell = -1;
@@ -105,6 +108,7 @@ final class HiveTurretAim {
         }
         if (manual || !requested || opening == null) {
             correcting = false;
+            lastCorrectionDirection = 0;
             restartFrameCount = 0;
         }
         if (manual) {
@@ -127,7 +131,10 @@ final class HiveTurretAim {
         double magnitude = Math.abs(error);
         double stopError = driving ? DRIVING_STOP_ERROR_DEGREES : STOP_ERROR_DEGREES;
         double startError = driving ? DRIVING_START_ERROR_DEGREES : START_ERROR_DEGREES;
-        double threshold = correcting ? stopError : startError;
+        int direction = error > 0 ? -1 : 1;
+        // After crossing center, hold a small error instead of immediately undoing the last step.
+        boolean crossedCenter = lastCorrectionDirection != 0 && direction != lastCorrectionDirection;
+        double threshold = correcting && !crossedCenter ? stopError : startError;
         if (magnitude <= threshold) {
             correcting = false;
             firstReversalFrame = Double.NaN;
@@ -136,20 +143,18 @@ final class HiveTurretAim {
         }
         boolean coarse = magnitude >= 4.0;
         double timestamp = frame.getTimestamp();
-        int direction = error > 0 ? -1 : 1;
         if (!correcting && !driving && !coarse && !confirmSettledRestart(direction, timestamp)) {
             return "Holding: aim settled";
         }
         correcting = true;
         restartFrameCount = 0;
-        double drivingGain = coarse ? DRIVING_LARGE_ERROR_GAIN : DRIVING_GAIN;
-        double step = driving
-                ? Range.clip(NEAR_STEP + (magnitude - DRIVING_STOP_ERROR_DEGREES) * drivingGain,
-                        NEAR_STEP, DRIVING_MAX_STEP)
-                : coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
-                        : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
-        long interval = driving ? DRIVING_STEP_INTERVAL_NANOS
-                : coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
+        double step = coarse
+                ? Range.clip(magnitude * (driving ? DRIVING_LARGE_ERROR_GAIN : TRACKING_GAIN),
+                        FINE_STEP, driving ? DRIVING_MAX_STEP : MAX_TRACKING_STEP)
+                : Range.clip(magnitude * NEAR_GAIN, NEAR_STEP, FINE_STEP);
+        long interval = coarse
+                ? (driving ? DRIVING_STEP_INTERVAL_NANOS : FAST_STEP_INTERVAL_NANOS)
+                : (driving ? DRIVING_FINE_SETTLE_NANOS : STATIONARY_FINE_SETTLE_NANOS);
         double next = Range.clip(position + direction * step, MIN_POSITION, MAX_POSITION);
         if (Math.abs(next - position) <= POSITION_TOLERANCE) {
             return "At travel limit";
@@ -159,6 +164,7 @@ final class HiveTurretAim {
         }
         if (timestamp != lastFrame && sendStep(next, interval)) {
             lastFrame = timestamp;
+            lastCorrectionDirection = direction;
             if (driving) {
                 lastDrivingDirection = direction;
             }
@@ -174,6 +180,7 @@ final class HiveTurretAim {
             previousError = Double.NaN;
             olderError = Double.NaN;
             correcting = false;
+            lastCorrectionDirection = 0;
             lastDrivingDirection = 0;
             firstReversalFrame = Double.NaN;
         }
