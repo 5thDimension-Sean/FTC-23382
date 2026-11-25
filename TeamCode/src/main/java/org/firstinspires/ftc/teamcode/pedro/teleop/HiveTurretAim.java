@@ -10,8 +10,9 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 final class HiveTurretAim {
-    private static final double MIN_POSITION = 0.32;
-    private static final double MAX_POSITION = 0.44;
+    private static final double MIN_POSITION = 0.386;
+    private static final double MAX_POSITION = 0.624;
+    private static final double POSITION_TOLERANCE = 0.00005;
     private static final double FINE_STEP = 0.001;
     private static final double MAX_TRACKING_STEP = 0.003;
     private static final double TRACKING_GAIN = 0.00045;
@@ -77,8 +78,9 @@ final class HiveTurretAim {
             return "Holding: target lost";
         }
         double position = servo.getPosition();
-        if (!(position >= MIN_POSITION && position <= MAX_POSITION)) {
-            return "Holding: servo command outside 0.32 to 0.44";
+        if (!withinTravel(position)) {
+            return String.format(java.util.Locale.US, "Holding: servo command outside %.4f to %.4f",
+                    MIN_POSITION, MAX_POSITION);
         }
         if (Math.abs(error) <= DEADBAND_DEGREES) {
             return "Holding: within 1 degree";
@@ -89,7 +91,7 @@ final class HiveTurretAim {
                 : Range.clip(magnitude * 0.00035, FINE_STEP, MAX_TRACKING_STEP);
         long interval = coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
         double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
-        if (next == position) {
+        if (Math.abs(next - position) <= POSITION_TOLERANCE) {
             return "At travel limit";
         }
         if (frame.getTimestamp() != lastFrame && sendStep(next, interval)) {
@@ -100,13 +102,18 @@ final class HiveTurretAim {
 
     void manualStep(boolean increase) {
         double position = servo.getPosition();
-        if (position >= MIN_POSITION && position <= MAX_POSITION) {
+        if (withinTravel(position)) {
             double delta = increase ? FINE_STEP : -FINE_STEP;
             double next = Range.clip(position + delta, MIN_POSITION, MAX_POSITION);
-            if (next != position) {
+            if (Math.abs(next - position) > POSITION_TOLERANCE) {
                 sendStep(next, STEP_INTERVAL_NANOS);
             }
         }
+    }
+
+    private static boolean withinTravel(double position) {
+        return position >= MIN_POSITION - POSITION_TOLERANCE
+                && position <= MAX_POSITION + POSITION_TOLERANCE;
     }
 
     private boolean sendStep(double next, long interval) {
