@@ -69,6 +69,11 @@ final class HiveTurretAim {
         return Double.isFinite(slope) && Double.isFinite(intercept);
     }
 
+    double openingErrorDegrees(HiveOpeningVision.Opening opening) {
+        double alignedX = slope * opening.z + intercept;
+        return Math.toDegrees(Math.atan2(opening.x, opening.z) - Math.atan2(alignedX, opening.z));
+    }
+
     void saveCalibration(HiveOpeningVision.Opening first, HiveOpeningVision.Opening second) {
         slope = (second.x - first.x) / (second.z - first.z);
         intercept = first.x - slope * first.z;
@@ -93,9 +98,7 @@ final class HiveTurretAim {
         if (opening != null) {
             telemetry.addData("Opening depth (in)", "%.1f", opening.z);
             if (isCalibrated()) {
-                double alignedX = slope * opening.z + intercept;
-                error = Math.toDegrees(Math.atan2(opening.x, opening.z)
-                        - Math.atan2(alignedX, opening.z));
+                error = openingErrorDegrees(opening);
                 if (requested && !manual) {
                     error = filteredError(opening.cell, frame.getTimestamp(), error);
                 }

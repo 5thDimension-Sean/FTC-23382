@@ -159,12 +159,15 @@ public class teleop extends OpMode {
         if (!allianceButton) {
             hiveOdometry.observe(opening);
         }
+        hiveOdometry.mapAutomatically(pose, opening, turret.turretServo.getPosition(),
+                frame == null ? Double.NaN : frame.getTimestamp(),
+                driving || manual || capture || allianceButton, hiveAim);
         String status = hiveAim.update(frame, opening, track, manual, driving, telemetry);
         if (track && !manual && opening == null && hiveAim.isCalibrated()) {
             status = hiveOdometry.reacquire(pose, hiveAim);
         }
         telemetry.addData("Hive aim", status);
-        telemetry.addData("Hive odometry (L3)", hiveOdometry.status());
+        telemetry.addData("Hive odometry", hiveOdometry.status());
         if (track && opening == null) {
             hiveOdometry.showPrediction(pose, telemetry);
         }

@@ -12,7 +12,13 @@ final class HiveOdometryAim {
             HiveTurretAim.STRAIGHT_AHEAD_POSITION, 0.5600, 0.6285};
 
     private final FieldPoint[] points = new FieldPoint[4];
-    private Pose first;
+    private final Sighting[] automaticFirst = new Sighting[4];
+    private Pose stablePose;
+    private int stableCell = -1;
+    private double stableCommand;
+    private long stableSince;
+    private double lastAutomaticFrame = Double.NaN;
+    private Sighting first;
     private int pendingCell = -1;
     private int lastSeenCell = -1;
     private long lastSeenNanos;
@@ -49,7 +55,7 @@ final class HiveOdometryAim {
         if (!canCapture(pose, opening, command)) {
             return;
         }
-        first = pose;
+        first = new Sighting(pose, pose.heading(), Double.NaN);
         pendingCell = opening.cell;
         status = "First point saved. Move sideways and line up the same opening.";
     }
@@ -63,28 +69,101 @@ final class HiveOdometryAim {
             return;
         }
 
-        double dx = pose.x() - first.x();
-        double dy = pose.y() - first.y();
-        double ux = Math.cos(first.heading()), uy = Math.sin(first.heading());
-        double vx = Math.cos(pose.heading()), vy = Math.sin(pose.heading());
-        double intersection = ux * vy - uy * vx;
-        if (Math.hypot(dx, dy) < MIN_BASELINE_INCHES
-                || Math.abs(intersection) < MIN_INTERSECTION_SINE) {
-            status = "Move farther sideways and face the same opening again.";
+        FieldPoint point = intersect(first, new Sighting(pose, pose.heading(), Double.NaN));
+        if (point == null) {
+            status = "Move farther sideways and recheck alignment with the same opening.";
             return;
         }
-
-        double firstDistance = (dx * vy - dy * vx) / intersection;
-        double secondDistance = (dx * uy - dy * ux) / intersection;
-        if (!(firstDistance > 0 && secondDistance > 0)) {
-            status = "Sight lines do not meet ahead of both poses. Recheck alignment.";
-            return;
-        }
-        points[opening.cell] = new FieldPoint(first.x() + ux * firstDistance,
-                first.y() + uy * firstDistance);
+        points[opening.cell] = point;
         first = null;
         pendingCell = -1;
         status = "Hive point saved for this cell.";
+    }
+
+    void mapAutomatically(Pose pose, HiveOpeningVision.Opening opening, double command,
+            double frameTimestamp, boolean moving, HiveTurretAim aim) {
+        if (moving || opening == null || !validPose(pose) || !aim.isCalibrated()
+                || command < TURRET_COMMANDS[0] || command > TURRET_COMMANDS[TURRET_COMMANDS.length - 1]
+                || !Double.isFinite(command)) {
+            stablePose = null;
+            return;
+        }
+        int cell = opening.cell;
+        if (points[cell] != null || pendingCell == cell) {
+            stablePose = null;
+            return;
+        }
+        double error = aim.openingErrorDegrees(opening);
+        if (!Double.isFinite(error) || Math.abs(error) > 5.0) {
+            stablePose = null;
+            return;
+        }
+
+        long now = System.nanoTime();
+        if (stablePose == null || stableCell != cell || Math.abs(command - stableCommand) > 0.0015
+                || Math.hypot(pose.x() - stablePose.x(), pose.y() - stablePose.y()) > 1.0
+                || Math.abs(normalize(pose.heading() - stablePose.heading())) > Math.toRadians(2)) {
+            stablePose = pose;
+            stableCell = cell;
+            stableCommand = command;
+            stableSince = now;
+            lastAutomaticFrame = frameTimestamp;
+            return;
+        }
+        if (now - stableSince < 250_000_000L || frameTimestamp == lastAutomaticFrame) {
+            return;
+        }
+        lastAutomaticFrame = frameTimestamp;
+        double heading = pose.heading() + Math.toRadians(angleForCommand(command) - error);
+        Sighting sample = new Sighting(pose, heading, Math.hypot(opening.x, opening.z));
+        Sighting previous = automaticFirst[cell];
+        if (previous == null) {
+            automaticFirst[cell] = sample;
+            status = "Auto: first sighting saved. Move sideways and pause with Hive in view.";
+            return;
+        }
+        FieldPoint point = intersect(previous, sample);
+        if (point != null) {
+            points[cell] = point;
+            automaticFirst[cell] = null;
+            status = "Hive point mapped automatically.";
+        }
+    }
+
+    private static double angleForCommand(double command) {
+        int lower = 0;
+        while (lower < TURRET_COMMANDS.length - 2 && command > TURRET_COMMANDS[lower + 1]) {
+            lower++;
+        }
+        double fraction = (command - TURRET_COMMANDS[lower])
+                / (TURRET_COMMANDS[lower + 1] - TURRET_COMMANDS[lower]);
+        return -90 + (lower + fraction) * 45;
+    }
+
+    private static FieldPoint intersect(Sighting first, Sighting second) {
+        double dx = second.pose.x() - first.pose.x();
+        double dy = second.pose.y() - first.pose.y();
+        double ux = Math.cos(first.heading), uy = Math.sin(first.heading);
+        double vx = Math.cos(second.heading), vy = Math.sin(second.heading);
+        double intersection = ux * vy - uy * vx;
+        if (Math.hypot(dx, dy) < MIN_BASELINE_INCHES
+                || Math.abs(intersection) < MIN_INTERSECTION_SINE) {
+            return null;
+        }
+        double firstDistance = (dx * vy - dy * vx) / intersection;
+        double secondDistance = (dx * uy - dy * ux) / intersection;
+        if (!validDistance(firstDistance, first.cameraDepth)
+                || !validDistance(secondDistance, second.cameraDepth)) {
+            return null;
+        }
+        return new FieldPoint(first.pose.x() + ux * firstDistance,
+                first.pose.y() + uy * firstDistance);
+    }
+
+    private static boolean validDistance(double distance, double cameraDepth) {
+        return Double.isFinite(distance) && distance > 0
+                && (Double.isNaN(cameraDepth)
+                || (distance >= 0.6 * cameraDepth && distance <= 1.6 * cameraDepth));
     }
 
     private boolean canCapture(Pose pose, HiveOpeningVision.Opening opening, double command) {
@@ -141,12 +220,28 @@ final class HiveOdometryAim {
 
     private static double bearingDegrees(Pose pose, FieldPoint point) {
         double relative = Math.atan2(point.y - pose.y(), point.x - pose.x()) - pose.heading();
-        return Math.toDegrees(Math.atan2(Math.sin(relative), Math.cos(relative)));
+        return Math.toDegrees(normalize(relative));
+    }
+
+    private static double normalize(double radians) {
+        return Math.atan2(Math.sin(radians), Math.cos(radians));
     }
 
     private static boolean validPose(Pose pose) {
         return pose != null && Double.isFinite(pose.x()) && Double.isFinite(pose.y())
                 && Double.isFinite(pose.heading());
+    }
+
+    private static final class Sighting {
+        final Pose pose;
+        final double heading;
+        final double cameraDepth;
+
+        Sighting(Pose pose, double heading, double cameraDepth) {
+            this.pose = pose;
+            this.heading = heading;
+            this.cameraDepth = cameraDepth;
+        }
     }
 
     private static final class FieldPoint {
