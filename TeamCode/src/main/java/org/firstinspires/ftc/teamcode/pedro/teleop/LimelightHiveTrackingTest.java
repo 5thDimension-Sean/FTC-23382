@@ -60,7 +60,7 @@ public class LimelightHiveTrackingTest extends LimelightHiveOpeningPreview {
         boolean track = gamepad1.left_bumper && first == null && !captureFirst && !captureSecond;
         telemetry.addData("Calibration", calibration);
         telemetry.addData("Servo command", "%.4f", servo.getPosition());
-        telemetry.addData("Turret", aim.update(frame, opening, track, manual, false, telemetry));
+        telemetry.addData("Turret", aim.update(frame, opening, track, manual, telemetry));
         telemetry.addLine("X/B manual. Hold LB to track. Flywheel off.");
     }
 

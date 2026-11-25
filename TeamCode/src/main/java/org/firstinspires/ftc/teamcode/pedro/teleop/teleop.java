@@ -134,10 +134,8 @@ public class teleop extends OpMode {
         previousAimButton = aimButton;
         telemetry.addData("Hands-free aim (R3)", handsFreeAim ? "On" : "Off");
         boolean track = handsFreeAim || gamepad2.right_bumper;
-        boolean searchClear = handsFreeAim && visionFrames.hasFreshFrame()
-                && !HiveOpeningVision.hasAllianceTags(frame, blueAlliance);
         telemetry.addData("Hive aim", hiveAim.update(frame, opening,
-                track && !allianceButton, manual, searchClear, telemetry));
+                track && !allianceButton, manual, telemetry));
     }
 
     @Override

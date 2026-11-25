@@ -10,14 +10,8 @@ final class LimelightFrames {
     private double timestamp;
     private long lastAdvanceNanos;
     private boolean clockAdvancing;
-    private boolean hasFreshFrame;
-
-    boolean hasFreshFrame() {
-        return hasFreshFrame;
-    }
 
     LLResult freshResult(Limelight3A limelight) {
-        hasFreshFrame = false;
         LLResult result = limelight.getLatestResult();
         if (result == null || result.getPipelineIndex() != PIPELINE) {
             return null;
@@ -37,8 +31,7 @@ final class LimelightFrames {
         }
 
         long ageMs = result.getStaleness();
-        hasFreshFrame = clockAdvancing && now - lastAdvanceNanos <= MAX_AGE_MS * 1_000_000
-                && ageMs >= 0 && ageMs <= MAX_AGE_MS;
-        return hasFreshFrame && result.isValid() ? result : null;
+        return clockAdvancing && now - lastAdvanceNanos <= MAX_AGE_MS * 1_000_000
+                && ageMs >= 0 && ageMs <= MAX_AGE_MS && result.isValid() ? result : null;
     }
 }

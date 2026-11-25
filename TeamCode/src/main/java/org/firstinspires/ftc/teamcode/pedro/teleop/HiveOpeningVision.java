@@ -18,19 +18,6 @@ final class HiveOpeningVision {
     private static final double MEMBER_Y = 7.1874;
     private static final double MEMBER_Z = -5.622;
 
-    static boolean hasAllianceTags(LLResult result, boolean blue) {
-        if (result != null) {
-            int first = blue ? 38 : 30;
-            for (FiducialResult tag : result.getFiducialResults()) {
-                int id = tag.getFiducialId();
-                if (id >= first && id < first + 8) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     static Opening find(LLResult result, boolean blue, Telemetry telemetry, boolean showTags) {
         if (result == null) {
             telemetry.addData("Selected cell", "Waiting for fresh Pipeline 0 tags");
