@@ -21,6 +21,11 @@ final class HiveTurretAim {
     private static final double NEAR_STEP = 0.0005;
     private static final long STEP_INTERVAL_NANOS = 60_000_000L;
     private static final long FAST_STEP_INTERVAL_NANOS = 35_000_000L;
+    private static final double DRIVING_STOP_ERROR_DEGREES = 0.6;
+    private static final double DRIVING_START_ERROR_DEGREES = 1.1;
+    private static final long DRIVING_FINE_INTERVAL_NANOS = 35_000_000L;
+    private static final long DRIVING_FAST_INTERVAL_NANOS = 25_000_000L;
+    private static final double DRIVING_FAST_STEP = 0.004;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
 
     private final ServoImplEx servo;
@@ -57,7 +62,7 @@ final class HiveTurretAim {
     }
 
     String update(LLResult frame, HiveOpeningVision.Opening opening,
-            boolean requested, boolean manual, Telemetry telemetry) {
+            boolean requested, boolean manual, boolean driving, Telemetry telemetry) {
         double error = Double.NaN;
         if (opening != null) {
             telemetry.addData("Opening depth (in)", "%.1f", opening.z);
@@ -89,16 +94,21 @@ final class HiveTurretAim {
                     MIN_POSITION, MAX_POSITION);
         }
         double magnitude = Math.abs(error);
-        double threshold = correcting ? STOP_ERROR_DEGREES : START_ERROR_DEGREES;
+        double stopError = driving ? DRIVING_STOP_ERROR_DEGREES : STOP_ERROR_DEGREES;
+        double startError = driving ? DRIVING_START_ERROR_DEGREES : START_ERROR_DEGREES;
+        double threshold = correcting ? stopError : startError;
         if (magnitude <= threshold) {
             correcting = false;
             return "Holding: aim settled";
         }
         correcting = true;
         boolean coarse = magnitude >= 4.0;
-        double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
+        double maxStep = driving ? DRIVING_FAST_STEP : MAX_TRACKING_STEP;
+        double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, maxStep)
                 : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
-        long interval = coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
+        long fineInterval = driving ? DRIVING_FINE_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
+        long fastInterval = driving ? DRIVING_FAST_INTERVAL_NANOS : FAST_STEP_INTERVAL_NANOS;
+        long interval = coarse ? fastInterval : fineInterval;
         double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
         if (Math.abs(next - position) <= POSITION_TOLERANCE) {
             return "At travel limit";

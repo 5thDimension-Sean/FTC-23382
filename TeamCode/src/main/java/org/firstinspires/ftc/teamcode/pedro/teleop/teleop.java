@@ -13,6 +13,9 @@ import org.firstinspires.ftc.teamcode.pedro.subsystem.turret;
 @TeleOp(name = "23382 Teleop")
 public class teleop extends OpMode {
 
+    private static final int TELEOP_LIMELIGHT_POLL_HZ = 200;
+    private static final double DRIVE_INPUT_THRESHOLD = 0.10;
+
     private Follower follower;
     private final LimelightFrames visionFrames = new LimelightFrames();
     private HiveTurretAim hiveAim;
@@ -29,7 +32,7 @@ public class teleop extends OpMode {
     public void init() {
         follower = Constants.create(hardwareMap);
         intake.init(hardwareMap);
-        turret.init(hardwareMap);
+        turret.init(hardwareMap, TELEOP_LIMELIGHT_POLL_HZ);
         hiveAim = new HiveTurretAim(turret.turretServo, hardwareMap.appContext);
         loader.init(hardwareMap);
     }
@@ -135,7 +138,13 @@ public class teleop extends OpMode {
         telemetry.addData("Hands-free aim (R3)", handsFreeAim ? "On" : "Off");
         boolean track = handsFreeAim || gamepad2.right_bumper;
         telemetry.addData("Hive aim", hiveAim.update(frame, opening,
-                track && !allianceButton, manual, telemetry));
+                track && !allianceButton, manual, driveInputActive(), telemetry));
+    }
+
+    private boolean driveInputActive() {
+        return Math.abs(gamepad1.left_stick_x) > DRIVE_INPUT_THRESHOLD
+                || Math.abs(gamepad1.left_stick_y) > DRIVE_INPUT_THRESHOLD
+                || Math.abs(gamepad1.right_stick_x) > DRIVE_INPUT_THRESHOLD;
     }
 
     @Override

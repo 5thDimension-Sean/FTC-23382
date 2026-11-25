@@ -30,10 +30,14 @@ public class turret {
     }
 
     public void init(HardwareMap hardwareMap){
+        init(hardwareMap, 100);
+    }
+
+    public void init(HardwareMap hardwareMap, int limelightPollHz) {
         limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
-        limelight.setPollRateHz(100);
-        limelight.start();
+        limelight.setPollRateHz(limelightPollHz);
         limelight.pipelineSwitch(0);
+        limelight.start();
 
         linkage = hardwareMap.get(ServoImplEx.class, Constants.TURRET_LINKAGE_SERVO_NAME);
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
