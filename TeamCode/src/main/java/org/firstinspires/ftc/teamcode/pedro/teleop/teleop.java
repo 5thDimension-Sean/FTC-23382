@@ -18,6 +18,8 @@ public class teleop extends OpMode {
     private HiveTurretAim hiveAim;
     private boolean blueAlliance = true;
     private boolean previousAllianceButton;
+    private boolean handsFreeAim;
+    private boolean previousAimButton;
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
@@ -30,6 +32,12 @@ public class teleop extends OpMode {
         turret.init(hardwareMap);
         hiveAim = new HiveTurretAim(turret.turretServo, hardwareMap.appContext);
         loader.init(hardwareMap);
+    }
+
+    @Override
+    public void start() {
+        previousAimButton = gamepad1.right_stick_button;
+        previousAllianceButton = gamepad1.dpad_down;
     }
 
     @Override
@@ -117,7 +125,15 @@ public class teleop extends OpMode {
         LLResult frame = visionFrames.freshResult(turret.getLimelight());
         HiveOpeningVision.Opening opening = HiveOpeningVision.find(frame, blueAlliance, telemetry, false);
         boolean manual = gamepad1.b || gamepad1.x || gamepad2.b || gamepad2.x;
-        boolean track = gamepad1.right_stick_button || gamepad2.right_bumper;
+        boolean aimButton = gamepad1.right_stick_button;
+        if (manual || allianceButton) {
+            handsFreeAim = false;
+        } else if (aimButton && !previousAimButton) {
+            handsFreeAim = !handsFreeAim;
+        }
+        previousAimButton = aimButton;
+        telemetry.addData("Hands-free aim (R3)", handsFreeAim ? "On" : "Off");
+        boolean track = handsFreeAim || gamepad2.right_bumper;
         telemetry.addData("Hive aim", hiveAim.update(frame, opening,
                 track && !allianceButton, manual, telemetry));
     }

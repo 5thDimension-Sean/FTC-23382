@@ -11,12 +11,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 final class HiveTurretAim {
     private static final double MIN_POSITION = 0.32;
-    private static final double MAX_POSITION = 0.38;
+    private static final double MAX_POSITION = 0.44;
     private static final double FINE_STEP = 0.001;
-    private static final double MAX_TRACKING_STEP = 0.0025;
-    private static final double TRACKING_GAIN = 0.00035;
+    private static final double MAX_TRACKING_STEP = 0.003;
+    private static final double TRACKING_GAIN = 0.00045;
     private static final double DEADBAND_DEGREES = 1.0;
     private static final long STEP_INTERVAL_NANOS = 60_000_000L;
+    private static final long FAST_STEP_INTERVAL_NANOS = 45_000_000L;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
 
     private final ServoImplEx servo;
@@ -77,17 +78,21 @@ final class HiveTurretAim {
         }
         double position = servo.getPosition();
         if (!(position >= MIN_POSITION && position <= MAX_POSITION)) {
-            return "Holding: servo command outside 0.32 to 0.38";
+            return "Holding: servo command outside 0.32 to 0.44";
         }
         if (Math.abs(error) <= DEADBAND_DEGREES) {
             return "Holding: within 1 degree";
         }
-        double step = Range.clip(Math.abs(error) * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP);
+        double magnitude = Math.abs(error);
+        boolean coarse = magnitude >= 4.0;
+        double step = coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
+                : Range.clip(magnitude * 0.00035, FINE_STEP, MAX_TRACKING_STEP);
+        long interval = coarse ? FAST_STEP_INTERVAL_NANOS : STEP_INTERVAL_NANOS;
         double next = Range.clip(position - Math.copySign(step, error), MIN_POSITION, MAX_POSITION);
         if (next == position) {
             return "At travel limit";
         }
-        if (frame.getTimestamp() != lastFrame && sendStep(next)) {
+        if (frame.getTimestamp() != lastFrame && sendStep(next, interval)) {
             lastFrame = frame.getTimestamp();
         }
         return "Tracking";
@@ -99,17 +104,17 @@ final class HiveTurretAim {
             double delta = increase ? FINE_STEP : -FINE_STEP;
             double next = Range.clip(position + delta, MIN_POSITION, MAX_POSITION);
             if (next != position) {
-                sendStep(next);
+                sendStep(next, STEP_INTERVAL_NANOS);
             }
         }
     }
 
-    private boolean sendStep(double next) {
+    private boolean sendStep(double next, long interval) {
         long now = System.nanoTime();
         if (now < nextStep) {
             return false;
         }
-        nextStep = now + STEP_INTERVAL_NANOS;
+        nextStep = now + interval;
         servo.setPosition(next);
         return true;
     }
