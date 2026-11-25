@@ -28,10 +28,12 @@ final class HiveOpeningVision {
     }
 
     static final class Opening {
+        final int cell;
         final double x;
         final double z;
 
-        Opening(double x, double z) {
+        Opening(int cell, double x, double z) {
+            this.cell = cell;
             this.x = x;
             this.z = z;
         }
@@ -66,7 +68,7 @@ final class HiveOpeningVision {
                 Math.toDegrees(Math.atan2(cell.sumX, cell.sumZ)));
         telemetry.addData("Tags used / bearing spread", "%d / %.2f deg",
                 cell.upright, cell.maxBearing - cell.minBearing);
-        return new Opening(cell.sumX / cell.upright, cell.sumZ / cell.upright);
+        return new Opening(selected, cell.sumX / cell.upright, cell.sumZ / cell.upright);
     }
 
     private static void showOpening(FiducialResult tag, int member, CellEstimate cell,

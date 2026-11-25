@@ -26,7 +26,9 @@ final class HiveTurretAim {
     private static final double DRIVING_START_ERROR_DEGREES = 1.1;
     private static final long DRIVING_STEP_INTERVAL_NANOS = 24_000_000L;
     private static final double DRIVING_GAIN = 0.00065;
-    private static final double DRIVING_MAX_STEP = 0.0045;
+    private static final double DRIVING_MAX_STEP = 0.005;
+    private static final double DRIVING_LARGE_ERROR_GAIN = 0.00080;
+    private static final long DRIVE_RELEASE_DELAY_NANOS = 150_000_000L;
     static final double MIN_CALIBRATION_DEPTH_DIFFERENCE = 12;
 
     private final ServoImplEx servo;
@@ -38,6 +40,12 @@ final class HiveTurretAim {
     private boolean correcting;
     private int lastDrivingDirection;
     private double firstReversalFrame = Double.NaN;
+    private long lastDriveInputNanos;
+    private int filteredCell = -1;
+    private double lastEstimateFrame = Double.NaN;
+    private double previousError = Double.NaN;
+    private double olderError = Double.NaN;
+    private double filteredError;
 
     HiveTurretAim(ServoImplEx servo, Context context) {
         this.servo = servo;
@@ -65,7 +73,16 @@ final class HiveTurretAim {
     }
 
     String update(LLResult frame, HiveOpeningVision.Opening opening,
-            boolean requested, boolean manual, boolean driving, Telemetry telemetry) {
+            boolean requested, boolean manual, boolean driveInput, Telemetry telemetry) {
+        long now = System.nanoTime();
+        if (driveInput) {
+            lastDriveInputNanos = now;
+        }
+        boolean driving = driveInput || (lastDriveInputNanos != 0
+                && now - lastDriveInputNanos < DRIVE_RELEASE_DELAY_NANOS);
+        if (!requested || manual || opening == null) {
+            filteredCell = -1;
+        }
         double error = Double.NaN;
         if (opening != null) {
             telemetry.addData("Opening depth (in)", "%.1f", opening.z);
@@ -73,6 +90,9 @@ final class HiveTurretAim {
                 double alignedX = slope * opening.z + intercept;
                 error = Math.toDegrees(Math.atan2(opening.x, opening.z)
                         - Math.atan2(alignedX, opening.z));
+                if (requested && !manual) {
+                    error = filteredError(opening.cell, frame.getTimestamp(), error);
+                }
                 telemetry.addData("Tracking error (deg)", "%+.2f", error);
             }
         }
@@ -111,8 +131,9 @@ final class HiveTurretAim {
         }
         correcting = true;
         boolean coarse = magnitude >= 4.0;
+        double drivingGain = coarse ? DRIVING_LARGE_ERROR_GAIN : DRIVING_GAIN;
         double step = driving
-                ? Range.clip(NEAR_STEP + (magnitude - DRIVING_STOP_ERROR_DEGREES) * DRIVING_GAIN,
+                ? Range.clip(NEAR_STEP + (magnitude - DRIVING_STOP_ERROR_DEGREES) * drivingGain,
                         NEAR_STEP, DRIVING_MAX_STEP)
                 : coarse ? Range.clip(magnitude * TRACKING_GAIN, FINE_STEP, MAX_TRACKING_STEP)
                         : Range.clip(magnitude * 0.00025, NEAR_STEP, FINE_STEP);
@@ -134,6 +155,31 @@ final class HiveTurretAim {
             }
         }
         return "Tracking";
+    }
+
+    private double filteredError(int cell, double timestamp, double measured) {
+        if (filteredCell != cell) {
+            filteredCell = cell;
+            lastEstimateFrame = Double.NaN;
+            previousError = Double.NaN;
+            olderError = Double.NaN;
+            correcting = false;
+            lastDrivingDirection = 0;
+            firstReversalFrame = Double.NaN;
+        }
+        if (timestamp != lastEstimateFrame) {
+            // At most one frame of lag, with isolated jumps rejected after the first two frames.
+            double median = Double.isNaN(olderError) ? measured
+                    : Math.max(Math.min(measured, previousError),
+                            Math.min(Math.max(measured, previousError), olderError));
+            boolean consistentlyOffCenter = Math.abs(measured) >= 4.0 && Math.abs(median) >= 4.0
+                    && Math.signum(measured) == Math.signum(median);
+            filteredError = consistentlyOffCenter ? measured : median;
+            olderError = previousError;
+            previousError = measured;
+            lastEstimateFrame = timestamp;
+        }
+        return filteredError;
     }
 
     private boolean confirmDrivingDirection(int direction, double timestamp) {
