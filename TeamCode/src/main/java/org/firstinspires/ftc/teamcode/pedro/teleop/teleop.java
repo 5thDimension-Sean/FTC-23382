@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedro.teleop;
 
 import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +14,10 @@ import org.firstinspires.ftc.teamcode.pedro.subsystem.turret;
 public class teleop extends OpMode {
 
     private Follower follower;
+    private final LimelightFrames visionFrames = new LimelightFrames();
+    private HiveTurretAim hiveAim;
+    private boolean blueAlliance = true;
+    private boolean previousAllianceButton;
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
@@ -23,6 +28,7 @@ public class teleop extends OpMode {
         follower = Constants.create(hardwareMap);
         intake.init(hardwareMap);
         turret.init(hardwareMap);
+        hiveAim = new HiveTurretAim(turret.turretServo, hardwareMap.appContext);
         loader.init(hardwareMap);
     }
 
@@ -74,6 +80,7 @@ public class teleop extends OpMode {
         } else if(gamepad2.left_bumper){
             turret.moveBlockerManual(0);
         }
+        updateHiveAim();
         telemetry.addData("Target Position(block)", turret.blocker.getPosition());
         telemetry.addData("Target Position(linkage)", turret.linkage.getPosition());
         telemetry.addData("Target Position(turret)", turret.turretServo.getPosition());
@@ -97,5 +104,26 @@ public class teleop extends OpMode {
         */
         follower.update();
 
+    }
+
+    private void updateHiveAim() {
+        boolean allianceButton = gamepad1.dpad_down;
+        if (allianceButton && !previousAllianceButton) {
+            blueAlliance = !blueAlliance;
+        }
+        previousAllianceButton = allianceButton;
+        telemetry.addData("Hive alliance (D-pad down)", blueAlliance ? "Blue" : "Red");
+        telemetry.addData("Hive calibration", hiveAim.isCalibrated() ? "Saved" : "Required");
+        LLResult frame = visionFrames.freshResult(turret.getLimelight());
+        HiveOpeningVision.Opening opening = HiveOpeningVision.find(frame, blueAlliance, telemetry, false);
+        boolean manual = gamepad1.b || gamepad1.x || gamepad2.b || gamepad2.x;
+        boolean track = gamepad1.right_stick_button || gamepad2.right_bumper;
+        telemetry.addData("Hive aim", hiveAim.update(frame, opening,
+                track && !allianceButton, manual, telemetry));
+    }
+
+    @Override
+    public void stop() {
+        turret.getLimelight().stop();
     }
 }

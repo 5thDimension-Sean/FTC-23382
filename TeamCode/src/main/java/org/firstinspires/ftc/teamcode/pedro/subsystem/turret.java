@@ -25,6 +25,10 @@ public class turret {
     public ServoImplEx blocker;
     Limelight3A limelight;
 
+    public Limelight3A getLimelight() {
+        return limelight;
+    }
+
     public void init(HardwareMap hardwareMap){
         limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
         limelight.setPollRateHz(100);
