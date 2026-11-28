@@ -80,6 +80,11 @@ public class Constants {
     public static final int TURRET_FLYWHEEL_TICKS_PER_REVOLUTION = 28; // goBILDA 5203-2402-0001
     public static final double TURRET_FLYWHEEL_MAX_TEST_RPM = 5000.0;
 
+    // Flywheel speed while the turret is activated. TODO tune: 3500 RPM is a placeholder.
+    public static final double TURRET_FLYWHEEL_SHOT_RPM = 3500.0;
+    public static final double TURRET_FLYWHEEL_SHOT_TICKS_PER_SEC =
+            TURRET_FLYWHEEL_SHOT_RPM * TURRET_FLYWHEEL_TICKS_PER_REVOLUTION / 60.0;
+
     public static final double TURRET_FLYWHEEL_KP = 12.5;
     public static final double TURRET_FLYWHEEL_KI = 1;
     public static final double TURRET_FLYWHEEL_KD = 0.0;

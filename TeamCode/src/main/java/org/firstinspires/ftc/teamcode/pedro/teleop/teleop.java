@@ -95,11 +95,9 @@ public class teleop extends OpMode {
         intake.setPowerGradual(outtakeRunning ? -1 : (intakeRunning ? 1 : 0));
         follower.update();
         turret.trackHive(follower.pose(), telemetry);
-        if (turretAutoTracking) {
-            turret.aimAtGoal(follower.pose(), telemetry);
-        } else {
-            turret.setFlywheelVelocity(0);
-        }
+        // The turret always aims at the HIVE; the flywheel only spins while the turret is activated.
+        turret.aimAtGoal(follower.pose(), telemetry);
+        turret.setFlywheelVelocity(turretAutoTracking ? Constants.TURRET_FLYWHEEL_SHOT_TICKS_PER_SEC : 0);
 
         if (gamepad2.b) {
             turret.moveTurretManual(1);
@@ -133,7 +131,7 @@ public class teleop extends OpMode {
         telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
         telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
         telemetry.addData("Intake running", intakeRunning);
-        telemetry.addData("Turret auto aim", turretAutoTracking);
+        telemetry.addData("Turret flywheel on", turretAutoTracking);
         telemetry.update();
     }
 
