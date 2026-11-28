@@ -94,8 +94,8 @@ public class teleop extends OpMode {
         boolean outtakeRunning = gamepad1.left_trigger > 0.5;
         intake.setPowerGradual(outtakeRunning ? -1 : (intakeRunning ? 1 : 0));
         follower.update();
+        turret.trackHive(follower.pose(), telemetry);
         if (turretAutoTracking) {
-            turret.trackHive(follower.pose(), telemetry);
             turret.aimAtGoal(follower.pose(), telemetry);
         } else {
             turret.setFlywheelVelocity(0);
@@ -133,7 +133,7 @@ public class teleop extends OpMode {
         telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
         telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
         telemetry.addData("Intake running", intakeRunning);
-        telemetry.addData("Hive observation", turretAutoTracking);
+        telemetry.addData("Turret auto aim", turretAutoTracking);
         telemetry.update();
     }
 
