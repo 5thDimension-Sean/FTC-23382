@@ -128,7 +128,7 @@ public class turret {
      */
     public void aimAtGoal(Pose pose, Telemetry telemetry) {
         double goalX = Constants.GOAL_FORWARD_IN;
-        double goalY = Constants.GOAL_LEFT_IN;
+        double goalY = Constants.goalLeftIn();
         double fieldBearing = Math.atan2(goalY - pose.y(), goalX - pose.x());
         double relative = Math.toDegrees(AngleUnit.normalizeRadians(fieldBearing - pose.heading()));
         double target = Constants.TURRET_CENTER + Constants.TURRET_SIGN * relative / Constants.TURRET_DEG_PER_UNIT;

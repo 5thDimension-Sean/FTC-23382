@@ -42,9 +42,13 @@ public class Constants {
     // points (+x forward, +y left). Start every match facing the alliance HIVE, then the goal is
     // straight ahead. MEASURE the distance from the robot's center to the HIVE's alliance-side
     // cell opening (inches) and set it here; set LEFT if you start off-axis (+ = left of heading).
-    public static final double GOAL_FORWARD_IN = 60.0; // TODO measure
-    public static final double GOAL_LEFT_IN = 0.0;
-    public static final double GOAL_HEIGHT_IN = 59.5;  // CELL opening is 53.5-65.6 in above the TILES
+    public static final double GOAL_FORWARD_IN = 48.0; // 4 ft from the start spot to the HIVE
+    public static final double GOAL_HEIGHT_IN = 60.0;  // 5 ft; CELL opening is 53.5-65.6 in up
+    // Start centered on the blue HIVE's line, so red's HIVE is 25.5 in (center to center) to the
+    // robot's right when facing the HIVE. +y is left.
+    public static double goalLeftIn() {
+        return isBlue() ? 0.0 : -25.5;
+    }
 
     public static final double pollenWeight = 24.95; //weight in g
     public static final double pollenDiameter = 2.8; //length in cm
