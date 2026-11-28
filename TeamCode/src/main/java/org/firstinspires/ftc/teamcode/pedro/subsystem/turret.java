@@ -28,6 +28,7 @@ public class turret {
     private double lastHiveFrame = Double.NaN;
     private boolean lastBlue;
     private String hiveStatus;
+    private int uprightCell = -1; // 0 = audience side, 1 = scoring-table side, -1 = unknown
 
 
     public void init(HardwareMap hardwareMap){
@@ -77,6 +78,7 @@ public class turret {
         }
         if (result.getTimestamp() != lastHiveFrame || blue != lastBlue) {
             hiveStatus = identifyUprightCell(result, blue);
+            uprightCell = hiveStatus.startsWith("Audience") ? 0 : hiveStatus.startsWith("Scoring") ? 1 : -1;
             lastHiveFrame = result.getTimestamp();
             lastBlue = blue;
         }
@@ -119,6 +121,25 @@ public class turret {
             return audienceUp ? "Both cells appear upright" : "No clear upright cell";
         }
         return audienceUp ? "Audience cell upright" : "Scoring-table cell upright";
+    }
+
+    /**
+     * Points the turret at the selected alliance's HIVE CELL from odometry: bearing = atan2(dy, dx)
+     * in the field frame, minus the robot heading, converted to a servo position.
+     * Call trackHive() first so the upright cell is known; until then it aims at HIVE center.
+     */
+    public void aimAtGoal(Pose pose, Telemetry telemetry) {
+        boolean blue = Constants.isBlue();
+        double goalX = blue ? Constants.HIVE_BLUE_X : Constants.HIVE_RED_X;
+        double goalY = uprightCell == 0 ? Constants.HIVE_AUDIENCE_CELL_Y
+                : uprightCell == 1 ? Constants.HIVE_SCORING_CELL_Y : 72.0;
+        double fieldBearing = Math.atan2(goalY - pose.y(), goalX - pose.x());
+        double relative = Math.toDegrees(AngleUnit.normalizeRadians(fieldBearing - pose.heading()));
+        double target = Constants.TURRET_CENTER + Constants.TURRET_SIGN * relative / Constants.TURRET_DEG_PER_UNIT;
+        double clipped = Math.max(Constants.TURRET_MIN, Math.min(Constants.TURRET_MAX, target));
+        turretServo.setPosition(clipped);
+        telemetry.addData("Turret aim", "goal (%.1f, %.1f) turret %.1f deg -> servo %.3f%s",
+                goalX, goalY, relative, clipped, clipped != target ? " (LIMIT)" : "");
     }
 
     public void stopTracking() {

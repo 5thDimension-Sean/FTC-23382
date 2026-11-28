@@ -47,8 +47,8 @@ public class teleop extends OpMode {
 
     @Override
     public void start() {
-        // Use the robot's position and heading at PLAY as the local odometry origin.
-        follower.setPose(Pose.zero());
+        // Odometry starts at the alliance's field-frame start pose so the turret can aim at the HIVE.
+        follower.setPose(Constants.startPose());
     }
 
     @Override
@@ -93,6 +93,7 @@ public class teleop extends OpMode {
         follower.update();
         if (turretAutoTracking) {
             turret.trackHive(follower.pose(), telemetry);
+            turret.aimAtGoal(follower.pose(), telemetry);
         } else {
             turret.setFlywheelVelocity(0);
         }

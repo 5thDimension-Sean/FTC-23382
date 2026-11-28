@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.pedro;
 import com.pedropathing.algorithm.Foresight;
 import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.controllers.Controller;
+import com.pedropathing.api.PoseFactory;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Matrix;
+import com.pedropathing.math.Pose;
 import com.pedropathing.math.Vector2D;
 import com.pedropathing.revhub.drivetrains.Mecanum;
 import com.pedropathing.revhub.drivetrains.MecanumConfig;
@@ -20,6 +22,38 @@ public class Constants {
     public static final String colorLeft = "BLUE";
     public static final String colorRight = "RED";
     public static String selectedTeam = "UNSELECTED";
+
+    /** Blue side tracks the blue AprilTags (IDs 38-45); red side tracks the red tags (IDs 30-37). */
+    public static boolean isBlue() {
+        return colorLeft.equals(selectedTeam);
+    }
+
+    // ---- Turret aiming (field frame: Pedro, inches, origin at a field corner, 144 x 144) ----
+    // goBILDA 5-turn servo = 1800 deg for 0..1 at 500-2500 us; it drives the SMALL gear of the
+    // 2.75:1 turret, so the turret turns 1/2.75 as far as the servo.
+    public static final double TURRET_SERVO_DEG_PER_UNIT = 1800.0;
+    public static final double TURRET_GEAR_RATIO = 2.75;
+    public static final double TURRET_DEG_PER_UNIT = TURRET_SERVO_DEG_PER_UNIT / TURRET_GEAR_RATIO; // ~654.5
+    public static final double TURRET_CENTER = 0.5;       // measured: turret points straight ahead
+    public static final double TURRET_MIN = 0.386;        // measured safe limits
+    public static final double TURRET_MAX = 0.624;
+    /** +1 if a larger servo command swings the turret counter-clockwise (left); flip to -1 if not. */
+    public static final double TURRET_SIGN = 1.0;
+
+    // HIVE per manual section 9.6 (TU11): centered on the field, red HIVE at x = 72 - 12.75 and
+    // blue at x = 72 + 12.75 (25.5 in center to center); each HIVE has a CELL 9.42 in either side
+    // of field center along y. Audience is at low y.
+    public static final double HIVE_RED_X = 59.25;
+    public static final double HIVE_BLUE_X = 84.75;
+    public static final double HIVE_AUDIENCE_CELL_Y = 62.58;
+    public static final double HIVE_SCORING_CELL_Y = 81.42;
+    public static final double GOAL_HEIGHT_IN = 59.5;     // CELL opening is 53.5-65.6 in above the TILES
+
+    // TODO measure/choose: where the robot sits at PLAY so odometry is in the field frame.
+    private static final PoseFactory degrees = PoseFactory.degrees();
+    public static Pose startPose() {
+        return isBlue() ? degrees.of(86, 8, 90) : degrees.of(58, 8, 90);
+    }
 
     public static final double pollenWeight = 24.95; //weight in g
     public static final double pollenDiameter = 2.8; //length in cm
