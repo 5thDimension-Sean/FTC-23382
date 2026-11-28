@@ -13,9 +13,10 @@ import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
-@Autonomous(name = "Left_R", group = "Auto")
+@Autonomous(name = "Left_R", group = "Auto", preselectTeleOp = Constants.DRIVER_TELEOP_NAME)
 public class FarRed extends OpMode {
     private Follower follower;
+    private Command routine;
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(57.75, 131.85, 90); // change starting positions
@@ -52,6 +53,7 @@ public class FarRed extends OpMode {
 
     @Override
     public void init() {
+        Constants.selectedTeam = Constants.colorRight;
         Scheduler.reset();
         follower = Constants.create(hardwareMap);
         follower.setPose(start);
@@ -59,12 +61,16 @@ public class FarRed extends OpMode {
     }
     @Override
     public void start() {
-        schedule(autoRoutine());
+        routine = autoRoutine();
+        schedule(routine);
     }
     @Override
     public void loop() {
         follower.update();
         Scheduler.execute();
+        if (!Scheduler.isScheduled(routine)) {
+            requestOpModeStop();
+        }
 
         telemetry.addData("X", follower.pose().x());
         telemetry.addData("Y", follower.pose().y());

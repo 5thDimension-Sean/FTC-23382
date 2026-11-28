@@ -11,24 +11,22 @@ import org.firstinspires.ftc.teamcode.pedro.subsystem.loader;
 import org.firstinspires.ftc.teamcode.pedro.subsystem.nectarSensors;
 import org.firstinspires.ftc.teamcode.pedro.subsystem.turret;
 
-@TeleOp(name = "23382 Teleop")
+@TeleOp(name = Constants.DRIVER_TELEOP_NAME)
 public class teleop extends OpMode {
 
     private Follower follower;
+    private Pose fieldToPlayFrame;
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
     nectarSensors nectar = new nectarSensors();
-    private boolean intakeRunning = false;
-    private boolean turretAutoTracking = false;
-    private boolean rightBumperWasPressed = false;
-    private boolean rightTriggerWasPressed = false;
-    private boolean loaderDown = false;
-    private boolean loaderButtonWasPressed = false;
+    private int loaderPresses;
+    private int intakePresses;
+    private int flywheelPresses;
 
     @Override
     public void init() {
-        follower = Constants.create(hardwareMap);
+        follower = Constants.createForTeleOp(hardwareMap);
         intake.init(hardwareMap);
         turret.init(hardwareMap);
         loader.init(hardwareMap);
@@ -45,14 +43,19 @@ public class teleop extends OpMode {
         }
 
         telemetry.addData("Team selection", Constants.selectedTeam);
+        follower.localizer.update();
+        Pose pose = follower.pose();
+        telemetry.addData("Pinpoint field pose (in, deg)", "%.1f, %.1f, %.1f",
+                pose.x(), pose.y(), Math.toDegrees(pose.heading()));
         telemetry.addData("Select team", "X = %s, B = %s", Constants.colorLeft, Constants.colorRight);
         telemetry.update();
     }
 
     @Override
     public void start() {
-        // PLAY pose is the origin: (0, 0) with heading 0 = robot front.
-        follower.setPose(Pose.zero());
+        gamepad1.resetEdgeDetection();
+        follower.localizer.update();
+        fieldToPlayFrame = follower.pose().invert();
     }
 
     @Override
@@ -63,45 +66,46 @@ public class teleop extends OpMode {
                 -gamepad1.right_stick_x
         );
 
-        boolean loaderButtonPressed = gamepad1.left_bumper;
-        if (loaderButtonPressed && !loaderButtonWasPressed) {
-            if (loaderDown) {
-                loaderDown = false;
+        if (gamepad1.leftBumperWasPressed()) {
+            loaderPresses++;
+            if (loaderPresses % 2 == 0) {
                 loader.position("up");
             } else {
-                loaderDown = true;
                 loader.position("down");
             }
         }
-        loaderButtonWasPressed = loaderButtonPressed;
 
-        // Right trigger (one press per pull): first press starts the intake, second press stops it
-        // and also stops the flywheel.
-        boolean rightTriggerPressed = gamepad1.right_trigger_pressed;
-        if (rightTriggerPressed && !rightTriggerWasPressed) {
-            if (intakeRunning) {
-                intakeRunning = false;
-                turretAutoTracking = false;
-            } else {
-                intakeRunning = true;
+        if (gamepad1.rightTriggerWasPressed()) {
+            intakePresses++;
+            if (intakePresses % 2 == 0) {
+                flywheelPresses = 0;
             }
         }
-        rightTriggerWasPressed = rightTriggerPressed;
-
-        // Right bumper toggles the flywheel: press to spin, press again to stop.
-        boolean rightBumperPressed = gamepad1.right_bumper;
-        if (rightBumperPressed && !rightBumperWasPressed) {
-            turretAutoTracking = !turretAutoTracking;
+        if (gamepad1.rightBumperWasPressed()) {
+            flywheelPresses++;
         }
-        rightBumperWasPressed = rightBumperPressed;
+        boolean intakeRunning = intakePresses % 2 != 0;
+        boolean flywheelRunning = flywheelPresses % 2 != 0;
         // Hold the left trigger to outtake; releasing it resumes the intake toggle state.
         boolean outtakeRunning = gamepad1.left_trigger > 0.5;
-        intake.setPowerGradual(outtakeRunning ? -1 : (intakeRunning ? 1 : 0));
+        if (outtakeRunning) {
+            intake.setPowerGradual(-1);
+        } else if (intakeRunning) {
+            intake.setPowerGradual(1);
+        } else {
+            intake.setPowerGradual(0);
+        }
+
         follower.update();
         turret.trackHive(follower.pose(), telemetry);
         // The turret always aims at the HIVE; the flywheel only spins while the turret is activated.
-        turret.aimAtGoal(follower.pose(), telemetry);
-        turret.setFlywheelVelocity(turretAutoTracking ? Constants.TURRET_FLYWHEEL_SHOT_TICKS_PER_SEC : 0);
+        // Existing goal offsets are expressed relative to PLAY. Keep Pinpoint in field coordinates.
+        turret.aimAtGoal(fieldToPlayFrame.compose(follower.pose()), telemetry);
+        if (flywheelRunning) {
+            turret.setFlywheelVelocity(Constants.TURRET_FLYWHEEL_SHOT_TICKS_PER_SEC);
+        } else {
+            turret.setFlywheelVelocity(0);
+        }
 
         if (gamepad2.b) {
             turret.moveTurretManual(1);
@@ -110,7 +114,11 @@ public class teleop extends OpMode {
         }
         // Color sort: NECTAR (red/blue) seen by either sensor closes the linkage, otherwise it opens.
         // Gamepad 2 Y / A still override while held.
-        turret.moveLink(nectar.nectarPresent(telemetry) ? "close" : "open");
+        if (nectar.nectarPresent(telemetry)) {
+            turret.moveLink("close");
+        } else {
+            turret.moveLink("open");
+        }
         if (gamepad2.y) {
             turret.moveLink("open");
         } else if (gamepad2.a) {
@@ -123,7 +131,7 @@ public class teleop extends OpMode {
         }
 
         // Keep the blocker open while the turret is moving, otherwise close it during intake.
-        if (outtakeRunning || turretAutoTracking || gamepad2.b || gamepad2.x) {
+        if (outtakeRunning || flywheelRunning || gamepad2.b || gamepad2.x) {
             turret.moveBlocker("open");
         } else if (intakeRunning) {
             turret.moveBlocker("close");
@@ -135,7 +143,7 @@ public class teleop extends OpMode {
         telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
         telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
         telemetry.addData("Intake running", intakeRunning);
-        telemetry.addData("Turret flywheel on", turretAutoTracking);
+        telemetry.addData("Turret flywheel on", flywheelRunning);
         telemetry.update();
     }
 

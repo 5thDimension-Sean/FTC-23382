@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
+    public static final String DRIVER_TELEOP_NAME = "23382 Teleop";
     public static final String colorLeft = "BLUE";
     public static final String colorRight = "RED";
     public static String selectedTeam = "UNSELECTED";
@@ -38,8 +39,8 @@ public class Constants {
     /** +1 if a larger servo command swings the turret counter-clockwise (left); flip to -1 if not. */
     public static final double TURRET_SIGN = -1.0;
 
-    // Odometry is zeroed at PLAY: (0, 0) is where the robot sits and heading 0 is where its front
-    // points (+x forward, +y left). Start every match facing the alliance HIVE, then the goal is
+    // These offsets use the local PLAY frame (+x forward, +y left).
+    // Start every match facing the alliance HIVE, then the goal is
     // straight ahead. MEASURE the distance from the robot's center to the HIVE's alliance-side
     // cell opening (inches) and set it here; set LEFT if you start off-axis (+ = left of heading).
     public static final double GOAL_FORWARD_IN = 48.0; // 4 ft from the start spot to the HIVE
@@ -92,8 +93,16 @@ public class Constants {
 
 
     public static Follower create(HardwareMap h) {
+        return create(h, localizerConfig);
+    }
+
+    public static Follower createForTeleOp(HardwareMap h) {
+        return create(h, pinpointConfig(PinpointLocalizer.ResetMode.NONE));
+    }
+
+    private static Follower create(HardwareMap h, PinpointConfig config) {
         return new Follower(
-                new PinpointLocalizer(h, localizerConfig),
+                new PinpointLocalizer(h, config),
                 new Mecanum(h, drivetrainConfig),
                 new Foresight(foresightConfig)
         );
@@ -109,17 +118,21 @@ public class Constants {
         c.backLeftDirection.set(DcMotorSimple.Direction.REVERSE);
         c.backRightDirection.set(DcMotorSimple.Direction.FORWARD);
     });
-    //fix
-    public static PinpointConfig localizerConfig = new PinpointConfig(c -> {
-        c.name.set(Constants.PINPOINT_NAME);
-        c.podType.set(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        c.xPodOffset.set(-3.25492126);
-        c.yPodOffset.set(-4.293885);
-        c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection.REVERSED);
-        c.globalDistanceUnit.set(DistanceUnit.INCH);
-        c.offsetUnits.set(DistanceUnit.INCH);
-    });
+    public static PinpointConfig localizerConfig = pinpointConfig(PinpointLocalizer.ResetMode.RECALIBRATE_IMU);
+
+    private static PinpointConfig pinpointConfig(PinpointLocalizer.ResetMode resetMode) {
+        return new PinpointConfig(c -> {
+            c.resetMode.set(resetMode);
+            c.name.set(Constants.PINPOINT_NAME);
+            c.podType.set(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+            c.xPodOffset.set(-3.25492126);
+            c.yPodOffset.set(-4.293885);
+            c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+            c.globalDistanceUnit.set(DistanceUnit.INCH);
+            c.offsetUnits.set(DistanceUnit.INCH);
+        });
+    }
     //fix
     public static ForesightConfig foresightConfig = new ForesightConfig(
             c -> {

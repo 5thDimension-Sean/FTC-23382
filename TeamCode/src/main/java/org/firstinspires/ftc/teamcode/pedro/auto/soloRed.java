@@ -15,9 +15,10 @@ import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
-@Autonomous(name = "Solo_R", group = "Auto")
+@Autonomous(name = "Solo_R", group = "Auto", preselectTeleOp = Constants.DRIVER_TELEOP_NAME)
 public class soloRed extends OpMode {
     private Follower follower;
+    private Command routine;
     private final PoseFactory poseFactory = PoseFactory.degrees();
     private final Pose start = poseFactory.of(58.75, 9.5, 270);
     private final Pose garden = poseFactory.of(7, 10, 270);
@@ -95,6 +96,7 @@ public class soloRed extends OpMode {
     }
     @Override
     public void init() {
+        Constants.selectedTeam = Constants.colorRight;
         Scheduler.reset();
         follower = Constants.create(hardwareMap);
         follower.setPose(start);
@@ -102,12 +104,16 @@ public class soloRed extends OpMode {
     }
     @Override
     public void start() {
-        schedule(autoRoutine());
+        routine = autoRoutine();
+        schedule(routine);
     }
     @Override
     public void loop() {
         follower.update();
         Scheduler.execute();
+        if (!Scheduler.isScheduled(routine)) {
+            requestOpModeStop();
+        }
 
         telemetry.addData("X", follower.pose().x());
         telemetry.addData("Y", follower.pose().y());
