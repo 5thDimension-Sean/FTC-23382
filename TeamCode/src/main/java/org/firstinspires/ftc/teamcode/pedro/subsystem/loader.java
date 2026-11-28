@@ -22,13 +22,13 @@ public class loader {
     /**
      * Moves both loader servos to a predefined position.
      *
-     * @param position "open" (1.0) or "close" (0.0), case-insensitive.
+     * @param position "up" (left 1.0, right 0.0) or "down" (left 0.0, right 1.0), case-insensitive.
      */
     public void position(String position){
-        if(position.equalsIgnoreCase("open")){
+        if(position.equalsIgnoreCase("up") || position.equalsIgnoreCase("open")){
             loaderLeft.setPosition(1.0);
             loaderRight.setPosition(0.0);
-        } else if(position.equalsIgnoreCase("close")){
+        } else if(position.equalsIgnoreCase("down") || position.equalsIgnoreCase("close")){
             loaderLeft.setPosition(0.0);
             loaderRight.setPosition(1.0);
         }

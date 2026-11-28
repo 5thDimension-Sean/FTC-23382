@@ -17,6 +17,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
+    public static final String colorLeft = "BLUE";
+    public static final String colorRight = "RED";
+    public static String selectedTeam = "UNSELECTED";
+
     public static final double pollenWeight = 24.95; //weight in g
     public static final double pollenDiameter = 2.8; //length in cm
     public static final double nectarWeight = 41.28; //weight in g
@@ -38,6 +42,8 @@ public class Constants {
     public static final String TURRET_LINKAGE_SERVO_NAME = "linkage";
     public static final String TURRET_ROTATION_SERVO_NAME = "turretServo";
     public static final String TURRET_BLOCKER_SERVO_NAME = "blocker";
+    public static final String INTAKE_KICKERRIGHT_SERVO_NAME = "kickerRight";
+    public static final String INTAKE_KICKERLEFT_SERVO_NAME = "kickerLeft";
 
     public static final int TURRET_FLYWHEEL_TICKS_PER_REVOLUTION = 28; // goBILDA 5203-2402-0001
     public static final double TURRET_FLYWHEEL_MAX_TEST_RPM = 5000.0;

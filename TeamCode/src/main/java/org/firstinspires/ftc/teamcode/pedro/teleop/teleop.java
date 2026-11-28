@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedro.teleop;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -16,7 +17,11 @@ public class teleop extends OpMode {
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
-    private int pressed = 0;
+    private boolean intakeRunning = false;
+    private boolean turretAutoTracking = false;
+    private boolean rightBumperWasPressed = false;
+    private boolean loaderDown = false;
+    private boolean loaderButtonWasPressed = false;
 
     @Override
     public void init() {
@@ -24,6 +29,26 @@ public class teleop extends OpMode {
         intake.init(hardwareMap);
         turret.init(hardwareMap);
         loader.init(hardwareMap);
+        loader.position("up");
+    }
+
+    @Override
+    public void init_loop() {
+        if (gamepad1.x) {
+            Constants.selectedTeam = Constants.colorLeft;
+        } else if (gamepad1.b) {
+            Constants.selectedTeam = Constants.colorRight;
+        }
+
+        telemetry.addData("Team selection", Constants.selectedTeam);
+        telemetry.addData("Select team", "X = %s, B = %s", Constants.colorLeft, Constants.colorRight);
+        telemetry.update();
+    }
+
+    @Override
+    public void start() {
+        // Use the robot's position and heading at PLAY as the local odometry origin.
+        follower.setPose(Pose.zero());
     }
 
     @Override
@@ -34,68 +59,79 @@ public class teleop extends OpMode {
                 -gamepad1.right_stick_x
         );
 
-        if(gamepad1.right_trigger != 0){
-            intake.setPowerGradual(Math.min(gamepad1.right_trigger+0.5, 1));
-            turret.setFlywheelVelocity(2500);
-        } else if(gamepad1.right_bumper){
-            intake.setPowerGradual(-1);
-        } else{
-            intake.setPowerGradual(0);
+        boolean loaderButtonPressed = gamepad1.left_bumper;
+        if (loaderButtonPressed && !loaderButtonWasPressed) {
+            if (loaderDown) {
+                loaderDown = false;
+                loader.position("up");
+            } else {
+                loaderDown = true;
+                loader.position("down");
+            }
+        }
+        loaderButtonWasPressed = loaderButtonPressed;
+
+        // Press the right trigger once to start the intake; press it again to stop.
+        if (gamepad1.right_trigger_pressed) {
+            if (intakeRunning) {
+                intakeRunning = false;
+                turretAutoTracking = false;
+            } else {
+                intakeRunning = true;
+            }
+        }
+
+        // While the intake is running, the right bumper toggles turret auto tracking.
+        boolean rightBumperPressed = gamepad1.right_bumper;
+        if (rightBumperPressed && !rightBumperWasPressed && intakeRunning) {
+            turretAutoTracking = !turretAutoTracking;
+        }
+        rightBumperWasPressed = rightBumperPressed;
+        // Hold the left trigger to outtake; releasing it resumes the intake toggle state.
+        boolean outtakeRunning = gamepad1.left_trigger > 0.5;
+        intake.setPowerGradual(outtakeRunning ? -1 : (intakeRunning ? 1 : 0));
+        follower.update();
+        if (turretAutoTracking) {
+            turret.trackHive(follower.pose(), telemetry);
+        } else {
             turret.setFlywheelVelocity(0);
         }
-        if(gamepad1.b){
+
+        if (gamepad2.b) {
             turret.moveTurretManual(1);
-        } else if(gamepad1.x){
+        } else if (gamepad2.x) {
             turret.moveTurretManual(0);
         }
-        if(gamepad1.y){
+        if (gamepad2.y) {
             turret.moveLink("open");
-        } else if(gamepad1.a){
+        } else if (gamepad2.a) {
             turret.moveLink("close");
         }
-        if(gamepad1.left_trigger_pressed){
+        if (gamepad2.left_trigger_pressed) {
             turret.moveBlocker("open");
-        } else if(gamepad1.left_bumper){
+        } else if (gamepad2.left_bumper) {
             turret.moveBlocker("close");
         }
 
-        if(gamepad2.b){
-            turret.moveTurretManual(1);
-        } else if(gamepad2.x){
-            turret.moveTurretManual(0);
+        // Keep the blocker open while the turret is moving, otherwise close it during intake.
+        if (outtakeRunning || turretAutoTracking || gamepad2.b || gamepad2.x) {
+            turret.moveBlocker("open");
+        } else if (intakeRunning) {
+            turret.moveBlocker("close");
         }
-        if(gamepad2.y){
-            turret.moveLinkManual(1);
-        } else if(gamepad2.a){
-            turret.moveLinkManual(0);
-        }
-        if(gamepad2.left_trigger_pressed){
-            turret.moveBlockerManual(1);
-        } else if(gamepad2.left_bumper){
-            turret.moveBlockerManual(0);
-        }
+
         telemetry.addData("Target Position(block)", turret.blocker.getPosition());
         telemetry.addData("Target Position(linkage)", turret.linkage.getPosition());
         telemetry.addData("Target Position(turret)", turret.turretServo.getPosition());
         telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
         telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
+        telemetry.addData("Intake running", intakeRunning);
+        telemetry.addData("Hive observation", turretAutoTracking);
         telemetry.update();
-        /*
-        if (gamepad1.a && pressed % 2 == 0){
-            loader.position("open");
-            pressed+=1;
-        } else if(gamepad1.a && pressed %2 != 0){
-            loader.position("close");
-            pressed-=1;
-        }
+    }
 
-        if(gamepad1.x){
-            loader.positionManual(0);
-        } else if(gamepad1.y){
-            loader.positionManual(1);
-        }
-        */
-        follower.update();
-
+    @Override
+    public void stop() {
+        turret.stopTracking();
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedro.subsystem;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,10 +11,9 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -24,22 +24,28 @@ public class turret {
     public ServoImplEx turretServo;
     public ServoImplEx blocker;
     Limelight3A limelight;
+    private final LimelightFrames visionFrames = new LimelightFrames();
+    private double lastHiveFrame = Double.NaN;
+    private boolean lastBlue;
+    private String hiveStatus;
+
 
     public void init(HardwareMap hardwareMap){
         limelight = hardwareMap.get(Limelight3A.class, Constants.LIMELIGHT_NAME);
         limelight.setPollRateHz(100);
         limelight.start();
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(LimelightFrames.PIPELINE);
 
         linkage = hardwareMap.get(ServoImplEx.class, Constants.TURRET_LINKAGE_SERVO_NAME);
         linkage.setPwmRange(new PwmControl.PwmRange(500, 2500));
 
         turretServo = hardwareMap.get(ServoImplEx.class, Constants.TURRET_ROTATION_SERVO_NAME);
         turretServo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        turretServo.setDirection(Servo.Direction.REVERSE);
 
         blocker = hardwareMap.get(ServoImplEx.class, Constants.TURRET_BLOCKER_SERVO_NAME);
         blocker.setPwmRange(new PwmControl.PwmRange(500, 2500));
-        blocker.setDirection(Servo.Direction.REVERSE);
+
 
         flywheel = hardwareMap.get(DcMotorEx.class, Constants.TURRET_FLYWHEEL_MOTOR_NAME);
         flywheel.setPower(0);
@@ -50,6 +56,73 @@ public class turret {
                 Constants.TURRET_FLYWHEEL_KD,
                 Constants.TURRET_FLYWHEEL_KF
         );
+    }
+
+    /** Reports the selected alliance's upright Hive cell alongside the current Pinpoint pose. */
+    public void trackHive(Pose pose, Telemetry telemetry) {
+        if (pose != null) {
+            telemetry.addData("Pinpoint (in, deg)", "%.1f, %.1f, %.1f",
+                    pose.x(), pose.y(), Math.toDegrees(pose.heading()));
+        }
+        boolean blue = Constants.colorLeft.equals(Constants.selectedTeam);
+        if (!blue && !Constants.colorRight.equals(Constants.selectedTeam)) {
+            telemetry.addData("Hive", "Select alliance during INIT");
+            return;
+        }
+        LLResult result = visionFrames.freshResult(limelight);
+        if (result == null) {
+            lastHiveFrame = Double.NaN;
+            telemetry.addData("Hive", "Waiting for fresh AprilTags on pipeline 0");
+            return;
+        }
+        if (result.getTimestamp() != lastHiveFrame || blue != lastBlue) {
+            hiveStatus = identifyUprightCell(result, blue);
+            lastHiveFrame = result.getTimestamp();
+            lastBlue = blue;
+        }
+        telemetry.addData("Hive (" + Constants.selectedTeam + ")", hiveStatus);
+    }
+
+    private static String identifyUprightCell(LLResult result, boolean blue) {
+        // Each alliance has two clusters of four tags. Blue's first cluster faces the audience.
+        int firstId = blue ? 38 : 30;
+        boolean[] upright = new boolean[2];
+        boolean[] inverted = new boolean[2];
+        for (FiducialResult tag : result.getFiducialResults()) {
+            int member = tag.getFiducialId() - firstId;
+            if (member < 0 || member >= 8) {
+                continue;
+            }
+            Pose3D tagPose = tag.getTargetPoseCameraSpace();
+            if (tagPose == null) {
+                continue;
+            }
+            // Same viewing-axis roll convention and ambiguity band as HiveOpeningVision.
+            YawPitchRollAngles angles = tagPose.getOrientation();
+            double x = angles.getRoll(AngleUnit.RADIANS);
+            double y = angles.getPitch(AngleUnit.RADIANS);
+            double z = angles.getYaw(AngleUnit.RADIANS);
+            double roll = Math.abs(Math.toDegrees(Math.atan2(Math.sin(z) * Math.cos(y),
+                    Math.sin(z) * Math.sin(y) * Math.sin(x) + Math.cos(z) * Math.cos(x))));
+            int cell = member / 4;
+            if (roll < 80) {
+                upright[cell] = true;
+            } else if (roll > 100) {
+                inverted[cell] = true;
+            }
+        }
+        int audience = blue ? 0 : 1;
+        int scoringTable = 1 - audience;
+        boolean audienceUp = upright[audience] && !inverted[audience];
+        boolean scoringUp = upright[scoringTable] && !inverted[scoringTable];
+        if (audienceUp == scoringUp) {
+            return audienceUp ? "Both cells appear upright" : "No clear upright cell";
+        }
+        return audienceUp ? "Audience cell upright" : "Scoring-table cell upright";
+    }
+
+    public void stopTracking() {
+        limelight.stop();
     }
 
     /**

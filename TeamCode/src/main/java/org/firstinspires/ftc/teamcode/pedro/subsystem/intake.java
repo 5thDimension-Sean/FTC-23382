@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedro.subsystem;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -10,6 +12,8 @@ public class intake {
     private DcMotor intakeRight;
     private double currentPower = 0.0;
     private long lastUpdateTime = System.nanoTime();
+    private CRServo kickerLeft;
+    private CRServo kickerRight;
 
     // Maximum power change per second
     private static final double RAMP_RATE = 6.5;
@@ -18,6 +22,9 @@ public class intake {
         intakeLeft = hardwareMap.get(DcMotor.class, Constants.INTAKE_LEFT_MOTOR_NAME);
         intakeRight = hardwareMap.get(DcMotor.class, Constants.INTAKE_RIGHT_MOTOR_NAME);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
+        kickerLeft = hardwareMap.get(CRServo.class, Constants.INTAKE_KICKERLEFT_SERVO_NAME);
+        kickerRight = hardwareMap.get(CRServo.class, Constants.INTAKE_KICKERRIGHT_SERVO_NAME);
+        kickerLeft.setDirection(CRServo.Direction.REVERSE);
     }
 
     /**
@@ -42,7 +49,8 @@ public class intake {
         } else {
             currentPower += Math.copySign(maxChange, difference);
         }
-
+        kickerLeft.setPower(targetPower);
+        kickerRight.setPower(targetPower);
         intakeLeft.setPower(currentPower);
         intakeRight.setPower(currentPower);
     }
