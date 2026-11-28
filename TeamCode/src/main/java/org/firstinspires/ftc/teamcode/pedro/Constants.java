@@ -36,7 +36,7 @@ public class Constants {
     public static final double TURRET_MIN = 0.386;        // measured safe limits
     public static final double TURRET_MAX = 0.624;
     /** +1 if a larger servo command swings the turret counter-clockwise (left); flip to -1 if not. */
-    public static final double TURRET_SIGN = 1.0;
+    public static final double TURRET_SIGN = -1.0;
 
     // Odometry is zeroed at PLAY: (0, 0) is where the robot sits and heading 0 is where its front
     // points (+x forward, +y left). Start every match facing the alliance HIVE, then the goal is
