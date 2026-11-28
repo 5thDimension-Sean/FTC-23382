@@ -28,7 +28,6 @@ public class turret {
     private double lastHiveFrame = Double.NaN;
     private boolean lastBlue;
     private String hiveStatus;
-    private int uprightCell = -1; // 0 = audience side, 1 = scoring-table side, -1 = unknown
 
 
     public void init(HardwareMap hardwareMap){
@@ -67,27 +66,31 @@ public class turret {
         }
         boolean blue = Constants.colorLeft.equals(Constants.selectedTeam);
         if (!blue && !Constants.colorRight.equals(Constants.selectedTeam)) {
-            telemetry.addData("Hive", "Select alliance during INIT");
+            telemetry.addData("Upright goal", "Unknown - select alliance during INIT");
             return;
         }
         LLResult result = visionFrames.freshResult(limelight);
         if (result == null) {
             lastHiveFrame = Double.NaN;
-            telemetry.addData("Hive", "Waiting for fresh AprilTags on pipeline 0");
+            telemetry.addData("Upright goal", "Unknown - waiting for fresh AprilTags on pipeline 0");
             return;
         }
         if (result.getTimestamp() != lastHiveFrame || blue != lastBlue) {
             hiveStatus = identifyUprightCell(result, blue);
-            uprightCell = hiveStatus.startsWith("Audience") ? 0 : hiveStatus.startsWith("Scoring") ? 1 : -1;
             lastHiveFrame = result.getTimestamp();
             lastBlue = blue;
         }
-        telemetry.addData("Hive (" + Constants.selectedTeam + ")", hiveStatus);
+        telemetry.addData("Upright goal", "%s / %s", Constants.selectedTeam, hiveStatus);
     }
 
     private static String identifyUprightCell(LLResult result, boolean blue) {
         // Each alliance has two clusters of four tags. Blue's first cluster faces the audience.
-        int firstId = blue ? 38 : 30;
+        int firstId = 30;
+        int audience = 1;
+        if (blue) {
+            firstId = 38;
+            audience = 0;
+        }
         boolean[] upright = new boolean[2];
         boolean[] inverted = new boolean[2];
         for (FiducialResult tag : result.getFiducialResults()) {
@@ -96,7 +99,7 @@ public class turret {
                 continue;
             }
             Pose3D tagPose = tag.getTargetPoseCameraSpace();
-            if (tagPose == null) {
+            if (tagPose == null || !(tagPose.getPosition().z > 0)) {
                 continue;
             }
             // Same viewing-axis roll convention and ambiguity band as HiveOpeningVision.
@@ -113,14 +116,19 @@ public class turret {
                 inverted[cell] = true;
             }
         }
-        int audience = blue ? 0 : 1;
         int scoringTable = 1 - audience;
         boolean audienceUp = upright[audience] && !inverted[audience];
         boolean scoringUp = upright[scoringTable] && !inverted[scoringTable];
-        if (audienceUp == scoringUp) {
-            return audienceUp ? "Both cells appear upright" : "No clear upright cell";
+        if (audienceUp && scoringUp) {
+            return "Unknown - both cells appear upright";
         }
-        return audienceUp ? "Audience cell upright" : "Scoring-table cell upright";
+        if (audienceUp) {
+            return "Backward (audience side)";
+        }
+        if (scoringUp) {
+            return "Forward (scoring-table side)";
+        }
+        return "Unknown - no clear upright cell";
     }
 
     /**
@@ -134,8 +142,12 @@ public class turret {
         double target = Constants.TURRET_CENTER + Constants.TURRET_SIGN * relative / Constants.TURRET_DEG_PER_UNIT;
         double clipped = Math.max(Constants.TURRET_MIN, Math.min(Constants.TURRET_MAX, target));
         turretServo.setPosition(clipped);
+        String limitStatus = "";
+        if (clipped != target) {
+            limitStatus = " (LIMIT)";
+        }
         telemetry.addData("Turret aim", "goal (%.1f, %.1f) turret %.1f deg -> servo %.3f%s",
-                goalX, goalY, relative, clipped, clipped != target ? " (LIMIT)" : "");
+                goalX, goalY, relative, clipped, limitStatus);
     }
 
     public void stopTracking() {

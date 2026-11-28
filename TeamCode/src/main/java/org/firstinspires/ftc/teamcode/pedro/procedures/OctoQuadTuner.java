@@ -23,6 +23,23 @@ public class OctoQuadTuner extends Procedure {
     public static double SWING_ARM = 336.877962768;
     public static double FOUR_BAR = 505.316944406;
 
+    static OctoQuad.EncoderDirection encoderDirection(boolean reversed) {
+        if (reversed) {
+            return OctoQuad.EncoderDirection.REVERSE;
+        }
+        return OctoQuad.EncoderDirection.FORWARD;
+    }
+
+    static double ticksPerUnit(PodType podType, double customScalar) {
+        if (podType == PodType.CUSTOM) {
+            return customScalar;
+        }
+        if (podType == PodType.SWING_ARM) {
+            return SWING_ARM;
+        }
+        return FOUR_BAR;
+    }
+
     public OctoQuadTuner() {
         super("OctoQuad Tuner", "A procedure for tuning the OctoQuad localizer.");
     }
@@ -56,6 +73,7 @@ public class OctoQuadTuner extends Procedure {
 
         List<Double> offsets = runOpMode(new OctoQuadOffsets(octoquadName.get(), podType.get(), customPodScalar, forwardPodReversed, strafePodReversed, headingScalar, xPort.get(), yPort.get()));
 
+        double ticksPerUnit = ticksPerUnit(podType.get(), customPodScalar);
         result("name", octoquadName.get());
         result("headingScalar", headingScalar);
 
@@ -63,11 +81,13 @@ public class OctoQuadTuner extends Procedure {
             result("podType", "Custom");
             result("ticksPerUnit", customPodScalar);
         } else {
-            result("podType", podType.get() == PodType.SWING_ARM ? SWING_ARM : FOUR_BAR);
+            result("podType", ticksPerUnit);
         }
 
-        result("xPodDirection", forwardPodReversed ? OctoQuad.EncoderDirection.REVERSE : OctoQuad.EncoderDirection.FORWARD);
-        result("yPodDirection", strafePodReversed ? OctoQuad.EncoderDirection.REVERSE : OctoQuad.EncoderDirection.FORWARD);
+        OctoQuad.EncoderDirection xDirection = encoderDirection(forwardPodReversed);
+        OctoQuad.EncoderDirection yDirection = encoderDirection(strafePodReversed);
+        result("xPodDirection", xDirection);
+        result("yPodDirection", yDirection);
         result("xPodOffset", offsets.get(0));
         result("yPodOffset", offsets.get(1));
 
@@ -75,11 +95,11 @@ public class OctoQuadTuner extends Procedure {
                 "    c.name.set(\"" + octoquadName.get() + "\");\n" +
                 "    c.xPodPort.set(" + xPort.get() + ");\n" +
                 "    c.yPodPort.set(" + yPort.get() + ");\n" +
-                (podType.get() == PodType.CUSTOM ? "    c.ticksPerUnit.set(" + customPodScalar + ");\n" : "    c.ticksPerUnit.set(" + (podType.get() == OctoQuadTuner.PodType.SWING_ARM ? SWING_ARM : FOUR_BAR) + ");\n") +
+                "    c.ticksPerUnit.set(" + ticksPerUnit + ");\n" +
                 "    c.xPodOffset.set(" + offsets.get(0) + ");\n" +
                 "    c.yPodOffset.set(" + offsets.get(1) + ");\n" +
-                "    c.xPodDirection.set(" + (forwardPodReversed ? "OctoQuad.EncoderDirection.REVERSE" : "OctoQuad.EncoderDirection.FORWARD") + ");\n" +
-                "    c.yPodDirection.set(" + (strafePodReversed ? "OctoQuad.EncoderDirection.REVERSE" : "OctoQuad.EncoderDirection.FORWARD") + ");\n" +
+                "    c.xPodDirection.set(OctoQuad.EncoderDirection." + xDirection.name() + ");\n" +
+                "    c.yPodDirection.set(OctoQuad.EncoderDirection." + yDirection.name() + ");\n" +
                 "    c.globalDistanceUnit.set(DistanceUnit.INCH);\n" +
                 "    c.offsetUnits.set(DistanceUnit.INCH);\n" +
                 "    c.i2cRecoveryMode.set(OctoQuad.I2cRecoveryMode." + recoveryMode.get() + ");\n" +
@@ -217,11 +237,7 @@ class OctoQuadForwardDirection extends TuningOpMode<Boolean> {
             c.xPodOffset.set(0.0);
             c.yPodOffset.set(0.0);
             c.headingScalar.set(headingScalar);
-            if (podType == OctoQuadTuner.PodType.CUSTOM) {
-                c.ticksPerUnit.set(customPodScalar);
-            } else {
-                c.ticksPerUnit.set(podType == OctoQuadTuner.PodType.SWING_ARM ? OctoQuadTuner.SWING_ARM : OctoQuadTuner.FOUR_BAR);
-            }
+            c.ticksPerUnit.set(OctoQuadTuner.ticksPerUnit(podType, customPodScalar));
         });
         OctoQuadLocalizer localizer = new OctoQuadLocalizer(hardwareMap, config);
         localizer.setPose(new Pose(0, 0));
@@ -267,11 +283,7 @@ class OctoQuadStrafeDirection extends TuningOpMode<Boolean> {
             c.yPodOffset.set(0.0);
             c.headingScalar.set(headingScalar);
 
-            if (podType == OctoQuadTuner.PodType.CUSTOM) {
-                c.ticksPerUnit.set(customPodScalar);
-            } else {
-                c.ticksPerUnit.set(podType == OctoQuadTuner.PodType.SWING_ARM ? OctoQuadTuner.SWING_ARM : OctoQuadTuner.FOUR_BAR);
-            }
+            c.ticksPerUnit.set(OctoQuadTuner.ticksPerUnit(podType, customPodScalar));
         });
         OctoQuadLocalizer localizer = new OctoQuadLocalizer(hardwareMap, config);
         localizer.setPose(new Pose(0, 0));
@@ -315,15 +327,10 @@ class OctoQuadOffsets extends TuningOpMode<List<Double>> {
             c.name.set(name);
             c.xPodPort.set(xPodPort);
             c.yPodPort.set(yPodPort);
-            c.xPodDirection.set(forwardPodReversed ? OctoQuad.EncoderDirection.REVERSE : OctoQuad.EncoderDirection.FORWARD);
-            c.yPodDirection.set(strafePodReversed ? OctoQuad.EncoderDirection.REVERSE : OctoQuad.EncoderDirection.FORWARD);
-            if (podType.equals(OctoQuadTuner.PodType.CUSTOM)) {
-                c.encoderResolutionUnit.set(DistanceUnit.INCH);
-                c.ticksPerUnit.set(customPodScalar);
-            } else {
-                c.encoderResolutionUnit.set(DistanceUnit.INCH);
-                c.ticksPerUnit.set(podType == OctoQuadTuner.PodType.SWING_ARM ? OctoQuadTuner.SWING_ARM : OctoQuadTuner.FOUR_BAR);
-            }
+            c.xPodDirection.set(OctoQuadTuner.encoderDirection(forwardPodReversed));
+            c.yPodDirection.set(OctoQuadTuner.encoderDirection(strafePodReversed));
+            c.encoderResolutionUnit.set(DistanceUnit.INCH);
+            c.ticksPerUnit.set(OctoQuadTuner.ticksPerUnit(podType, customPodScalar));
             c.xPodOffset.set(0.0);
             c.yPodOffset.set(0.0);
             c.headingScalar.set(headingScalar);

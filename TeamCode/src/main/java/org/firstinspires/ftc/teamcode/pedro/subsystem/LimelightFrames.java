@@ -31,7 +31,10 @@ final class LimelightFrames {
         }
 
         long ageMs = result.getStaleness();
-        return clockAdvancing && now - lastAdvanceNanos <= MAX_AGE_MS * 1_000_000
-                && ageMs >= 0 && ageMs <= MAX_AGE_MS && result.isValid() ? result : null;
+        boolean frameIsRecent = now - lastAdvanceNanos <= MAX_AGE_MS * 1_000_000;
+        if (clockAdvancing && frameIsRecent && ageMs >= 0 && ageMs <= MAX_AGE_MS && result.isValid()) {
+            return result;
+        }
+        return null;
     }
 }

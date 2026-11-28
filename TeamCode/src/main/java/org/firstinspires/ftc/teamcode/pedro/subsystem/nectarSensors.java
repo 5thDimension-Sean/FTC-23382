@@ -40,14 +40,26 @@ public class nectarSensors {
             telemetry.addData("Color " + label, "missing from robot config");
             return false;
         }
-        double cm = sensor instanceof DistanceSensor
-                ? ((DistanceSensor) sensor).getDistance(DistanceUnit.CM) : 0;
+        double cm = 0;
+        if (sensor instanceof DistanceSensor) {
+            cm = ((DistanceSensor) sensor).getDistance(DistanceUnit.CM);
+        }
         NormalizedRGBA c = sensor.getNormalizedColors();
         boolean near = !Double.isNaN(cm) && cm <= NEAR_CM;
         boolean red = c.red > DOMINANCE * c.green && c.red > DOMINANCE * c.blue;
         boolean blue = c.blue > DOMINANCE * c.red && c.blue > DOMINANCE * c.green * 0.85;
+        String reading;
+        if (!near) {
+            reading = "none";
+        } else if (red) {
+            reading = "RED nectar";
+        } else if (blue) {
+            reading = "BLUE nectar";
+        } else {
+            reading = "pollen/other";
+        }
         telemetry.addData("Color " + label, "%.1f cm  r%.3f g%.3f b%.3f  %s", cm,
-                c.red, c.green, c.blue, !near ? "none" : red ? "RED nectar" : blue ? "BLUE nectar" : "pollen/other");
+                c.red, c.green, c.blue, reading);
         return near && (red || blue);
     }
 }

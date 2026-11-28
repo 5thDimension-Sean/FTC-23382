@@ -526,16 +526,14 @@ class HeadingBraking extends TuningOpMode<List<Double>> {
             totalHeading += Angle.normalizeSigned(currentHeading - previousHeading);
             previousHeading = currentHeading;
 
-            direction = (iteration % 2 == 0) ? 1 : -1;
+            if (iteration % 2 == 0) {
+                direction = 1;
+            } else {
+                direction = -1;
+            }
             if (iteration < POWERS.length) {
                 power = POWERS[iteration];
             }
-
-//            if (state != State.DONE) {
-//                double voltage = voltageSensor.getVoltage();
-//                double duty = state == State.BRAKE ? -brakingPower * direction: power * direction;
-//                double appliedVoltage = voltage * duty;
-//            }
 
             switch (state) {
                 case DRIVE: {
@@ -801,7 +799,11 @@ class ForwardBraking extends TuningOpMode<List<Double>> {
                         "stopped the robot at (%.0f, %.0f): more than %.0f in past the test's ends or %.0f in across them",
                         localizer.pose().x(), localizer.pose().y(), OVERRUN, DRIFT));
             }
-            direction = (iteration % 2 == 0) ? 1 : -1;
+            if (iteration % 2 == 0) {
+                direction = 1;
+            } else {
+                direction = -1;
+            }
             if (iteration < POWERS.length) {
                 power = POWERS[iteration];
             }
@@ -979,7 +981,11 @@ class StrafeBraking extends TuningOpMode<List<Double>> {
                         "stopped the robot at (%.0f, %.0f): more than %.0f in past the test's ends or %.0f in across them",
                         localizer.pose().x(), localizer.pose().y(), OVERRUN, DRIFT));
             }
-            direction = (iteration % 2 == 0) ? 1 : -1;
+            if (iteration % 2 == 0) {
+                direction = 1;
+            } else {
+                direction = -1;
+            }
             if (iteration < POWERS.length) {
                 power = POWERS[iteration];
             }

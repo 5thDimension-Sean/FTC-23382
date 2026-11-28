@@ -52,8 +52,14 @@ public class TurretFlywheelTuner extends OpMode {
         boolean increase = gamepad1.dpad_up && !previousUp;
         boolean decrease = gamepad1.dpad_down && !previousDown;
         if (increase != decrease) {
-            double step = gamepad1.left_bumper ? 1.0 : 0.1;
-            gains[selectedGain] = Math.max(0, gains[selectedGain] + (increase ? step : -step));
+            double step = 0.1;
+            if (gamepad1.left_bumper) {
+                step = 1.0;
+            }
+            if (decrease) {
+                step = -step;
+            }
+            gains[selectedGain] = Math.max(0, gains[selectedGain] + step);
             applyGains();
         }
         previousRight = gamepad1.dpad_right;
@@ -61,8 +67,10 @@ public class TurretFlywheelTuner extends OpMode {
         previousUp = gamepad1.dpad_up;
         previousDown = gamepad1.dpad_down;
 
-        double target = gamepad1.right_bumper
-                ? MAX_TEST_TICKS_PER_SECOND * gamepad1.right_trigger : 0;
+        double target = 0;
+        if (gamepad1.right_bumper) {
+            target = MAX_TEST_TICKS_PER_SECOND * gamepad1.right_trigger;
+        }
         if (target > 0) {
             flywheel.setVelocity(target);
         } else {

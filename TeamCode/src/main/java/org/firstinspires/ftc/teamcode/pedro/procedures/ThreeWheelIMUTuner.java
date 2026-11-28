@@ -173,7 +173,10 @@ public class ThreeWheelIMUTuner extends Procedure {
     }
 
     static String direction(double direction) {
-        return direction == Encoder.REVERSE ? "Encoder.REVERSE" : "Encoder.FORWARD";
+        if (direction == Encoder.REVERSE) {
+            return "Encoder.REVERSE";
+        }
+        return "Encoder.FORWARD";
     }
 
     static ThreeWheelIMUConfig config(boolean left, double forward, double strafe,
@@ -183,8 +186,14 @@ public class ThreeWheelIMUTuner extends Procedure {
             c.rightEncoderName.set(rightEncoderName);
             c.strafeEncoderName.set(strafeEncoderName);
             c.imuName.set(imuName);
-            c.imu.set(new RevHubIMU(new RevHubOrientationOnRobot(logoDirection, usbDirection)));            c.leftPodY.set(left ? 0.0 : 1.0);
-            c.rightPodY.set(left ? -1.0 : 0.0);
+            c.imu.set(new RevHubIMU(new RevHubOrientationOnRobot(logoDirection, usbDirection)));
+            if (left) {
+                c.leftPodY.set(0.0);
+                c.rightPodY.set(-1.0);
+            } else {
+                c.leftPodY.set(1.0);
+                c.rightPodY.set(0.0);
+            }
             c.strafePodX.set(0.0);
             c.forwardTicksToInches.set(forward);
             c.strafeTicksToInches.set(strafe);
@@ -216,9 +225,16 @@ class ThreeWheelIMUResolution extends TuningOpMode<List<Double>> {
     String pod;
     double distance;
 
+    private static String pushDirection(String pod) {
+        if (pod.equals("Strafe")) {
+            return "left";
+        }
+        return "forward";
+    }
+
     ThreeWheelIMUResolution(String pod, double distance) {
         super(pod + " Encoder Resolution and Direction",
-                "After Start, push the robot " + (pod.equals("Strafe") ? "left " : "forward ") +
+                "After Start, push the robot " + pushDirection(pod) + " " +
                         distance + " inches exactly without turning. Stop moving, press Stop to save this measurement.", true);
         this.pod = pod;
         this.distance = distance;
@@ -241,11 +257,18 @@ class ThreeWheelIMUResolution extends TuningOpMode<List<Double>> {
         if (position == null) {
             return null;
         }
-        double movement = pod.equals("Strafe") ? position.y() : position.x();
+        double movement = position.x();
+        if (pod.equals("Strafe")) {
+            movement = position.y();
+        }
         if (movement == 0.0) {
             return null;
         }
-        return List.of(Math.abs(movement / distance), movement < 0 ? Encoder.REVERSE : Encoder.FORWARD);
+        double direction = Encoder.FORWARD;
+        if (movement < 0) {
+            direction = Encoder.REVERSE;
+        }
+        return List.of(Math.abs(movement / distance), direction);
     }
 }
 
@@ -258,9 +281,16 @@ class ThreeWheelIMUOffsets extends TuningOpMode<List<Double>> {
     double rightDirection;
     double strafeDirection;
 
+    private static String offsetTitle(boolean left) {
+        if (left) {
+            return "Left Pod Offset Identification";
+        }
+        return "Right Pod Offset Identification";
+    }
+
     ThreeWheelIMUOffsets(boolean left, double forward, double strafe,
                          double leftDirection, double rightDirection, double strafeDirection) {
-        super((left ? "Left" : "Right") + " Pod Offset Identification",
+        super(offsetTitle(left),
                 "After Start, rotate exactly 180 degrees counterclockwise about the robot center. " +
                         "Keep that center fixed. Stop moving, press Stop to save this measurement.", true);
         this.left = left;

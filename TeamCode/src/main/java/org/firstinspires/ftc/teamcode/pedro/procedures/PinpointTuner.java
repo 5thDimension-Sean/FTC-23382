@@ -18,6 +18,20 @@ public class PinpointTuner extends Procedure {
         FOUR_BAR,
         CUSTOM
     }
+    static GoBildaPinpointDriver.EncoderDirection encoderDirection(boolean reversed) {
+        if (reversed) {
+            return GoBildaPinpointDriver.EncoderDirection.REVERSED;
+        }
+        return GoBildaPinpointDriver.EncoderDirection.FORWARD;
+    }
+
+    static GoBildaPinpointDriver.GoBildaOdometryPods standardPod(PodType podType) {
+        if (podType == PodType.SWING_ARM) {
+            return GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD;
+        }
+        return GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+    }
+
     public PinpointTuner() {
         super("Pinpoint Tuner", "A procedure for tuning the Pinpoint localizer.");
     }
@@ -45,25 +59,31 @@ public class PinpointTuner extends Procedure {
 
         result("name", pinpointName.get());
 
+        String podConfigLine;
         if (customPodScalar.isPresent()) {
             result("podType", "Custom");
             result("ticksPerUnit", customPodScalar.getAsDouble());
+            podConfigLine = "    c.ticksPerUnit.set(OptionalDouble.of(" + customPodScalar.getAsDouble() + "));\n";
         } else {
-            result("podType", podType.get() == PodType.SWING_ARM ? GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD : GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+            GoBildaPinpointDriver.GoBildaOdometryPods pod = standardPod(podType.get());
+            result("podType", pod);
+            podConfigLine = "    c.podType.set(GoBildaPinpointDriver.GoBildaOdometryPods." + pod.name() + ");\n";
         }
 
-        result("xPodDirection", forwardPodReversed ? GoBildaPinpointDriver.EncoderDirection.REVERSED : GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        result("yPodDirection", strafePodReversed ? GoBildaPinpointDriver.EncoderDirection.REVERSED : GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        GoBildaPinpointDriver.EncoderDirection xDirection = encoderDirection(forwardPodReversed);
+        GoBildaPinpointDriver.EncoderDirection yDirection = encoderDirection(strafePodReversed);
+        result("xPodDirection", xDirection);
+        result("yPodDirection", yDirection);
         result("xPodOffset", offsets.get(0));
         result("yPodOffset", offsets.get(1));
 
         code(Language.JAVA,"public static PinpointConfig localizerConfig = new PinpointConfig(c -> {\n" +
                 "    c.name.set(\"" + pinpointName.get() + "\");\n" +
-                (customPodScalar.isPresent() ? "    c.ticksPerUnit.set(OptionalDouble.of(" + customPodScalar.getAsDouble() + "));\n" : "    c.podType.set(" + (podType.get() == PodType.SWING_ARM ? "GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD" : "GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD") + ");\n") +
+                podConfigLine +
                 "    c.xPodOffset.set(" + offsets.get(0) + ");\n" +
                 "    c.yPodOffset.set(" + offsets.get(1) + ");\n" +
-                "    c.xPodDirection.set(" + (forwardPodReversed ? "GoBildaPinpointDriver.EncoderDirection.REVERSED" : "GoBildaPinpointDriver.EncoderDirection.FORWARD") + ");\n" +
-                "    c.yPodDirection.set(" + (strafePodReversed ? "GoBildaPinpointDriver.EncoderDirection.REVERSED" : "GoBildaPinpointDriver.EncoderDirection.FORWARD") + ");\n" +
+                "    c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection." + xDirection.name() + ");\n" +
+                "    c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection." + yDirection.name() + ");\n" +
                 "    c.globalDistanceUnit.set(DistanceUnit.INCH);\n" +
                 "    c.offsetUnits.set(DistanceUnit.INCH);\n" +
                 "});");
@@ -134,7 +154,7 @@ class PinpointForwardDirection extends TuningOpMode<Boolean> {
                 c.encoderResolutionUnit.set(DistanceUnit.INCH);
                 c.ticksPerUnit.set(OptionalDouble.of(customPodScalar.getAsDouble()));
             } else {
-                c.podType.set(podType == PinpointTuner.PodType.SWING_ARM ? GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD : GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+                c.podType.set(PinpointTuner.standardPod(podType));
             }
         });
         PinpointLocalizer localizer = new PinpointLocalizer(hardwareMap, config);
@@ -185,7 +205,7 @@ class PinpointStrafeDirection extends TuningOpMode<Boolean> {
                 c.encoderResolutionUnit.set(DistanceUnit.INCH);
                 c.ticksPerUnit.set(OptionalDouble.of(customPodScalar.getAsDouble()));
             } else {
-                c.podType.set(podType == PinpointTuner.PodType.SWING_ARM ? GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD : GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+                c.podType.set(PinpointTuner.standardPod(podType));
             }
         });
         PinpointLocalizer localizer = new PinpointLocalizer(hardwareMap, config);
@@ -233,14 +253,14 @@ class PinpointOffsets extends TuningOpMode<List<Double>> {
     protected List<Double> runTuningOpMode() throws InterruptedException {
         PinpointConfig config = new PinpointConfig(c -> {
             c.name.set(name);
-            c.xPodDirection.set(forwardPodReversed ? GoBildaPinpointDriver.EncoderDirection.REVERSED : GoBildaPinpointDriver.EncoderDirection.FORWARD);
-            c.yPodDirection.set(strafePodReversed ? GoBildaPinpointDriver.EncoderDirection.REVERSED : GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            c.xPodDirection.set(PinpointTuner.encoderDirection(forwardPodReversed));
+            c.yPodDirection.set(PinpointTuner.encoderDirection(strafePodReversed));
             if (customPodScalar.isPresent()) {
                 c.encoderResolutionUnit.set(DistanceUnit.INCH);
                 c.ticksPerUnit.set(OptionalDouble.of(customPodScalar.getAsDouble()));
                 c.resetMode.set(PinpointLocalizer.ResetMode.RESET_AND_RECALIBRATE_IMU);
             } else {
-                c.podType.set(podType == PinpointTuner.PodType.SWING_ARM ? GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD : GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+                c.podType.set(PinpointTuner.standardPod(podType));
             }
             c.xPodOffset.set(0.0);
             c.yPodOffset.set(0.0);

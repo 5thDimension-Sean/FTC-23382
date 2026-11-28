@@ -86,10 +86,19 @@ public class TwoWheelTuner extends Procedure {
         result("strafeTicksPerInch", strafeTicksPerInch);
         result("forwardTicksToInches", forwardTicksToInches);
         result("strafeTicksToInches", strafeTicksToInches);
-        result("xPodDirection", forwardPodReversed ? "REVERSED" : "FORWARD");
-        result("yPodDirection", strafePodReversed ? "REVERSED" : "FORWARD");
+        result("xPodDirection", directionLabel(forwardPodReversed));
+        result("yPodDirection", directionLabel(strafePodReversed));
         result("xPodOffset", offsets.get(0));
         result("yPodOffset", offsets.get(1));
+
+        String forwardDirectionCode = "Encoder.FORWARD";
+        if (forwardPodReversed) {
+            forwardDirectionCode = "Encoder.REVERSE";
+        }
+        String strafeDirectionCode = "Encoder.FORWARD";
+        if (strafePodReversed) {
+            strafeDirectionCode = "Encoder.REVERSE";
+        }
 
         code(Language.JAVA,
                 "public static TwoWheelConfig localizerConfig = new TwoWheelConfig(c -> {\n" +
@@ -100,18 +109,28 @@ public class TwoWheelTuner extends Procedure {
                         "    c.yPodOffset.set(" + offsets.get(1) + ");\n" +
                         "    c.forwardTicksToInches.set(" + forwardTicksToInches + ");\n" +
                         "    c.strafeTicksToInches.set(" + strafeTicksToInches + ");\n" +
-                        "    c.xPodDirection.set(" +
-                        (forwardPodReversed ? "Encoder.REVERSE" : "Encoder.FORWARD") +
-                        ");\n" +
-                        "    c.yPodDirection.set(" +
-                        (strafePodReversed ? "Encoder.REVERSE" : "Encoder.FORWARD") +
-                        ");\n" +
+                        "    c.xPodDirection.set(" + forwardDirectionCode + ");\n" +
+                        "    c.yPodDirection.set(" + strafeDirectionCode + ");\n" +
                         "    c.imu.set(new RevHubIMU(new RevHubOrientationOnRobot(\n" +
                         "            RevHubOrientationOnRobot.LogoFacingDirection." + values.logoDirection.name() + ",\n" +
                         "            RevHubOrientationOnRobot.UsbFacingDirection." + values.usbDirection.name() + "\n" +
                         "    )));\n" +
                         "});"
         );
+    }
+
+    static double encoderDirection(boolean reversed) {
+        if (reversed) {
+            return Encoder.REVERSE;
+        }
+        return Encoder.FORWARD;
+    }
+
+    private static String directionLabel(boolean reversed) {
+        if (reversed) {
+            return "REVERSED";
+        }
+        return "FORWARD";
     }
 
     static TwoWheelConfig config(
@@ -371,8 +390,8 @@ class TwoWheelOffsets extends TuningOpMode<List<Double>> {
                 values,
                 forwardTicksToInches,
                 strafeTicksToInches,
-                forwardPodReversed ? Encoder.REVERSE : Encoder.FORWARD,
-                strafePodReversed ? Encoder.REVERSE : Encoder.FORWARD,
+                TwoWheelTuner.encoderDirection(forwardPodReversed),
+                TwoWheelTuner.encoderDirection(strafePodReversed),
                 0.0,
                 0.0
         );

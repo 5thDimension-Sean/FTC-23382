@@ -48,7 +48,10 @@ public class Constants {
     // Start centered on the blue HIVE's line, so red's HIVE is 25.5 in (center to center) to the
     // robot's right when facing the HIVE. +y is left.
     public static double goalLeftIn() {
-        return isBlue() ? 0.0 : -25.5;
+        if (isBlue()) {
+            return 0.0;
+        }
+        return -25.5;
     }
 
     public static final double pollenWeight = 24.95; //weight in g
