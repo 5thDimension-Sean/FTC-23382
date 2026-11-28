@@ -22,6 +22,7 @@ public class teleop extends OpMode {
     private boolean intakeRunning = false;
     private boolean turretAutoTracking = false;
     private boolean rightBumperWasPressed = false;
+    private boolean rightTriggerWasPressed = false;
     private boolean loaderDown = false;
     private boolean loaderButtonWasPressed = false;
 
@@ -74,8 +75,10 @@ public class teleop extends OpMode {
         }
         loaderButtonWasPressed = loaderButtonPressed;
 
-        // Press the right trigger once to start the intake; press it again to stop.
-        if (gamepad1.right_trigger_pressed) {
+        // Right trigger (one press per pull): first press starts the intake, second press stops it
+        // and also stops the flywheel.
+        boolean rightTriggerPressed = gamepad1.right_trigger_pressed;
+        if (rightTriggerPressed && !rightTriggerWasPressed) {
             if (intakeRunning) {
                 intakeRunning = false;
                 turretAutoTracking = false;
@@ -83,10 +86,11 @@ public class teleop extends OpMode {
                 intakeRunning = true;
             }
         }
+        rightTriggerWasPressed = rightTriggerPressed;
 
-        // While the intake is running, the right bumper toggles turret auto tracking.
+        // Right bumper toggles the flywheel: press to spin, press again to stop.
         boolean rightBumperPressed = gamepad1.right_bumper;
-        if (rightBumperPressed && !rightBumperWasPressed && intakeRunning) {
+        if (rightBumperPressed && !rightBumperWasPressed) {
             turretAutoTracking = !turretAutoTracking;
         }
         rightBumperWasPressed = rightBumperPressed;
