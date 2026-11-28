@@ -104,21 +104,21 @@ public class teleop extends OpMode {
         telemetry.addData("Target Position(loaderLeft)", loader.loaderLeft.getPosition());
         telemetry.addData("Target Position(loaderRight)", loader.loaderRight.getPosition());
         telemetry.update();
-        /*
-        if (gamepad1.a && pressed % 2 == 0){
+
+        if (gamepad1.dpad_up && pressed % 2 == 0){
             loader.position("open");
             pressed+=1;
-        } else if(gamepad1.a && pressed %2 != 0){
+        } else if(gamepad1.dpad_up && pressed %2 != 0){
             loader.position("close");
             pressed-=1;
         }
 
-        if(gamepad1.x){
+        if(gamepad1.dpad_left){
             loader.positionManual(0);
-        } else if(gamepad1.y){
+        } else if(gamepad1.dpad_right){
             loader.positionManual(1);
         }
-        */
+
         follower.update();
 
     }
