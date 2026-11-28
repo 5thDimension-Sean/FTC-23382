@@ -124,15 +124,11 @@ public class turret {
     }
 
     /**
-     * Points the turret at the selected alliance's HIVE CELL from odometry: bearing = atan2(dy, dx)
-     * in the field frame, minus the robot heading, converted to a servo position.
-     * Call trackHive() first so the upright cell is known; until then it aims at HIVE center.
+     * Points the turret at the HIVE from odometry: bearing = atan2(dy, dx) in the start-relative frame, minus the robot heading, converted to a servo position.
      */
     public void aimAtGoal(Pose pose, Telemetry telemetry) {
-        boolean blue = Constants.isBlue();
-        double goalX = blue ? Constants.HIVE_BLUE_X : Constants.HIVE_RED_X;
-        double goalY = uprightCell == 0 ? Constants.HIVE_AUDIENCE_CELL_Y
-                : uprightCell == 1 ? Constants.HIVE_SCORING_CELL_Y : 72.0;
+        double goalX = Constants.GOAL_FORWARD_IN;
+        double goalY = Constants.GOAL_LEFT_IN;
         double fieldBearing = Math.atan2(goalY - pose.y(), goalX - pose.x());
         double relative = Math.toDegrees(AngleUnit.normalizeRadians(fieldBearing - pose.heading()));
         double target = Constants.TURRET_CENTER + Constants.TURRET_SIGN * relative / Constants.TURRET_DEG_PER_UNIT;

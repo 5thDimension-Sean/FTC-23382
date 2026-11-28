@@ -47,8 +47,8 @@ public class teleop extends OpMode {
 
     @Override
     public void start() {
-        // Odometry starts at the alliance's field-frame start pose so the turret can aim at the HIVE.
-        follower.setPose(Constants.startPose());
+        // PLAY pose is the origin: (0, 0) with heading 0 = robot front.
+        follower.setPose(Pose.zero());
     }
 
     @Override

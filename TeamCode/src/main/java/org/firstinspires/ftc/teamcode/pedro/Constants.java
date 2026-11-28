@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.pedro;
 import com.pedropathing.algorithm.Foresight;
 import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.controllers.Controller;
-import com.pedropathing.api.PoseFactory;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Matrix;
-import com.pedropathing.math.Pose;
 import com.pedropathing.math.Vector2D;
 import com.pedropathing.revhub.drivetrains.Mecanum;
 import com.pedropathing.revhub.drivetrains.MecanumConfig;
@@ -40,20 +38,13 @@ public class Constants {
     /** +1 if a larger servo command swings the turret counter-clockwise (left); flip to -1 if not. */
     public static final double TURRET_SIGN = 1.0;
 
-    // HIVE per manual section 9.6 (TU11): centered on the field, red HIVE at x = 72 - 12.75 and
-    // blue at x = 72 + 12.75 (25.5 in center to center); each HIVE has a CELL 9.42 in either side
-    // of field center along y. Audience is at low y.
-    public static final double HIVE_RED_X = 59.25;
-    public static final double HIVE_BLUE_X = 84.75;
-    public static final double HIVE_AUDIENCE_CELL_Y = 62.58;
-    public static final double HIVE_SCORING_CELL_Y = 81.42;
-    public static final double GOAL_HEIGHT_IN = 59.5;     // CELL opening is 53.5-65.6 in above the TILES
-
-    // TODO measure/choose: where the robot sits at PLAY so odometry is in the field frame.
-    private static final PoseFactory degrees = PoseFactory.degrees();
-    public static Pose startPose() {
-        return isBlue() ? degrees.of(86, 8, 90) : degrees.of(58, 8, 90);
-    }
+    // Odometry is zeroed at PLAY: (0, 0) is where the robot sits and heading 0 is where its front
+    // points (+x forward, +y left). Start every match facing the alliance HIVE, then the goal is
+    // straight ahead. MEASURE the distance from the robot's center to the HIVE's alliance-side
+    // cell opening (inches) and set it here; set LEFT if you start off-axis (+ = left of heading).
+    public static final double GOAL_FORWARD_IN = 60.0; // TODO measure
+    public static final double GOAL_LEFT_IN = 0.0;
+    public static final double GOAL_HEIGHT_IN = 59.5;  // CELL opening is 53.5-65.6 in above the TILES
 
     public static final double pollenWeight = 24.95; //weight in g
     public static final double pollenDiameter = 2.8; //length in cm
