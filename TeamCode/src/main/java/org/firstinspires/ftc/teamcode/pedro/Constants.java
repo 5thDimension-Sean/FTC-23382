@@ -62,6 +62,9 @@ public class Constants {
     public static final String PINPOINT_NAME = "pinpoint";
     public static final String LIMELIGHT_NAME = "limelight";
 
+    public static final String COLOR_LEFT_SENSOR_NAME = "colorLeft";
+    public static final String COLOR_RIGHT_SENSOR_NAME = "colorRight";
+
     public static final String INTAKE_LEFT_MOTOR_NAME = "intakeLeft";
     public static final String INTAKE_RIGHT_MOTOR_NAME = "intakeRight";
     public static final String LOADER_LEFT_SERVO_NAME = "loaderLeft";

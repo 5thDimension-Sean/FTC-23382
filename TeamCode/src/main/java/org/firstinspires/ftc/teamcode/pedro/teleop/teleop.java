@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.subsystem.intake;
 import org.firstinspires.ftc.teamcode.pedro.subsystem.loader;
+import org.firstinspires.ftc.teamcode.pedro.subsystem.nectarSensors;
 import org.firstinspires.ftc.teamcode.pedro.subsystem.turret;
 
 @TeleOp(name = "23382 Teleop")
@@ -17,6 +18,7 @@ public class teleop extends OpMode {
     intake intake = new intake();
     turret turret = new turret();
     loader loader = new loader();
+    nectarSensors nectar = new nectarSensors();
     private boolean intakeRunning = false;
     private boolean turretAutoTracking = false;
     private boolean rightBumperWasPressed = false;
@@ -29,6 +31,7 @@ public class teleop extends OpMode {
         intake.init(hardwareMap);
         turret.init(hardwareMap);
         loader.init(hardwareMap);
+        nectar.init(hardwareMap);
         loader.position("up");
     }
 
@@ -103,6 +106,9 @@ public class teleop extends OpMode {
         } else if (gamepad2.x) {
             turret.moveTurretManual(0);
         }
+        // Color sort: NECTAR (red/blue) seen by either sensor closes the linkage, otherwise it opens.
+        // Gamepad 2 Y / A still override while held.
+        turret.moveLink(nectar.nectarPresent(telemetry) ? "close" : "open");
         if (gamepad2.y) {
             turret.moveLink("open");
         } else if (gamepad2.a) {
